@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Plan Book Pro — Advanced Lesson Planning Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700;9..144,900&family=Kalam:wght@400;700&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --paper:       #FAF7F0;
+  --paper-warm:  #F5EFE0;
+  --paper-edge:  #E8DDCA;
+  --rule:        #D9CEBB;
+  --rule-soft:   #EDE5D5;
+  --ink:         #1C2E4A;
+  --ink-soft:    #3A5270;
+  --ink-ghost:   #7A8FA8;
+  --margin:      #B83C2E;
+  --margin-soft: #D96B5E;
+  --chalk:       #3A6B4F;
+  --chalk-soft:  #5A8B6F;
+  --amber:       #E8A520;
+  --amber-light: #FBF0D3;
+  --violet:      #5B4BA0;
+  --violet-light:#EEE9FF;
+  --teal:        #1E7A7A;
+  --teal-light:  #D5EFEF;
+  --bg:          #E8E0D0;
+  --bg-deep:     #DDD4C0;
+  --shadow:      rgba(28,46,74,0.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Work Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 10% 5%, rgba(255,255,255,0.5) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 95%, rgba(255,255,255,0.3) 0%, transparent 50%);
+}
+
+/* ── Layout ── */
+.app-wrap { max-width: 1340px; margin: 0 auto; padding: 28px 20px 80px; }
+
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; margin-bottom: 32px; flex-wrap: wrap;
+  border-bottom: 3px double var(--rule); padding-bottom: 20px;
+}
+.page-head-left h1 {
+  font-family: 'Fraunces', serif; font-weight: 900;
+  font-size: clamp(2.4rem, 4.5vw, 3.6rem); letter-spacing: -0.02em;
+  line-height: 1; color: var(--ink);
+}
+.page-head-left h1 em { color: var(--margin); font-style: italic; }
+.page-head-left .tagline { margin: 8px 0 0; color: var(--ink-soft); font-size: 0.92rem; max-width: 52ch; line-height: 1.5; }
+.page-head-right { text-align: right; }
+.engine-badge {
+  font-family: 'Work Sans', sans-serif; font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-ghost);
+  border: 1px solid var(--rule); border-radius: 3px; padding: 3px 10px; display: inline-block; margin-bottom: 6px;
+}
+.ledger {
+  font-family: 'Kalam', cursive; font-size: 0.88rem; color: var(--ink-soft);
+  line-height: 1.6; text-align: right;
+}
+
+/* ── Main two-col layout ── */
+.layout { display: grid; grid-template-columns: 440px 1fr; gap: 28px; align-items: start; }
+@media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+
+/* ── Form panel ── */
+.form-panel {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: 0 2px 0 var(--paper-edge), 0 12px 32px -18px var(--shadow);
+  overflow: hidden;
+}
+.form-panel-header {
+  background: var(--ink); color: var(--paper); padding: 16px 22px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.form-panel-header h2 {
+  font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.15rem; color: var(--paper);
+}
+.tab-row {
+  display: flex; gap: 2px;
+}
+.tab-btn {
+  font-family: 'Work Sans', sans-serif; font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
+  padding: 5px 10px; cursor: pointer; transition: all 0.15s;
+}
+.tab-btn.active { background: var(--margin); color: #fff; border-color: var(--margin); }
+.tab-btn:hover:not(.active) { background: rgba(255,255,255,0.2); color: #fff; }
+
+.form-body { padding: 20px 22px 24px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.section-sep {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-ghost); margin: 18px 0 10px; padding-bottom: 4px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.field { margin-bottom: 13px; }
+.field label {
+  display: block; font-size: 0.7rem; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 5px; font-weight: 600;
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 11px; }
+.field input, .field select, .field textarea {
+  width: 100%; font-family: 'Work Sans', sans-serif; font-size: 0.9rem; color: var(--ink);
+  background: transparent; border: none; border-bottom: 1.5px solid var(--rule);
+  padding: 6px 2px 7px; outline: none; transition: border-color 0.15s; resize: vertical;
+}
+.field textarea { min-height: 52px; line-height: 1.45; }
+.field input:focus, .field select:focus, .field textarea:focus { border-bottom-color: var(--margin); }
+.field select { cursor: pointer; }
+.field .hint { font-size: 0.75rem; color: var(--ink-ghost); margin-top: 3px; font-style: italic; }
+
+/* Checkbox grid */
+.check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 4px; }
+.check-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--ink-soft); cursor: pointer; }
+.check-item input[type=checkbox] { accent-color: var(--chalk); width: 14px; height: 14px; flex-shrink: 0; }
+
+/* Variation seeds */
+.seed-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.seed-row label { font-size: 0.7rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+.seed-row input { flex: 1; }
+.seed-row button {
+  font-size: 0.75rem; font-weight: 600; color: var(--chalk); background: none;
+  border: 1px solid var(--chalk); border-radius: 999px; padding: 4px 10px; cursor: pointer;
+  white-space: nowrap;
+}
+.seed-row button:hover { background: var(--chalk); color: #fff; }
+
+/* Submit */
+.submit-area { margin-top: 22px; border-top: 1px solid var(--rule-soft); padding-top: 18px; }
+.submit-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+button.generate {
+  font-family: 'Fraunces', serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.04em;
+  color: #fff; background: var(--chalk); border: none; border-radius: 999px;
+  padding: 12px 28px; cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+button.generate:hover { background: #2d5440; transform: translateY(-1px); }
+button.generate:disabled { background: #9CB0A0; cursor: wait; transform: none; }
+.generate-icon { font-size: 1.1rem; }
+.status { font-size: 0.83rem; color: var(--ink-ghost); font-style: italic; min-height: 1.2em; }
+.error-box {
+  margin-top: 12px; padding: 10px 12px; border-left: 3px solid var(--margin);
+  background: #FBEDEa; color: #8A332B; font-size: 0.84rem; border-radius: 2px; display: none;
+}
+
+/* Mode chips */
+.mode-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.mode-pill {
+  font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--rule); color: var(--ink-soft); background: transparent;
+  transition: all 0.15s; user-select: none;
+}
+.mode-pill.selected { border-color: var(--violet); background: var(--violet-light); color: var(--violet); }
+.mode-pill:hover:not(.selected) { border-color: var(--ink-soft); color: var(--ink); }
+
+/* Progress bar */
+.gen-progress { margin-top: 10px; display: none; }
+.gen-progress-bar { height: 3px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.gen-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--chalk), var(--teal)); border-radius: 2px;
+  width: 0%; transition: width 0.4s ease;
+}
+.gen-steps { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.gen-step { font-size: 0.7rem; color: var(--ink-ghost); opacity: 0.4; transition: opacity 0.3s; }
+.gen-step.active { opacity: 1; color: var(--chalk); font-weight: 600; }
+.gen-step.done { opacity: 0.6; }
+
+/* ── Output panel ── */
+.output-panel { min-height: 400px; }
+.output-toolbar {
+  display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; flex-wrap: wrap;
+}
+.output-toolbar button {
+  font-family: 'Work Sans', sans-serif; font-size: 0.77rem; font-weight: 600;
+  color: var(--ink-soft); background: var(--paper); border: 1px solid var(--rule);
+  border-radius: 999px; padding: 6px 14px; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.output-toolbar button:hover { border-color: var(--ink-soft); color: var(--ink); }
+.output-toolbar button.primary-tool {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+}
+.output-toolbar button.primary-tool:hover { background: var(--ink-soft); }
+
+.output-card {
+  background: #FFFFFF; border: 1px solid #D8D2C8; border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(28,46,74,0.09); overflow: hidden;
+  width: 210mm; max-width: 100%; margin: 0 auto;
+}
+
+/* Empty state */
+.empty-state { padding: 64px 32px 80px; text-align: center; }
+.empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.25; }
+.empty-state h3 { font-family: 'Fraunces', serif; font-size: 1.5rem; color: var(--ink); margin-bottom: 8px; }
+.empty-state p { color: var(--ink-soft); font-size: 0.93rem; max-width: 42ch; margin: 0 auto; line-height: 1.6; }
+.feature-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; }
+.feature-chip {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-ghost); border: 1px solid var(--rule); border-radius: 3px; padding: 4px 10px;
+}
+
+/* ── Rendered plan ── */
+.plan-output { padding: 18mm 18mm 14mm; font-size: 0.93rem; color: var(--ink); }
+@media (max-width: 760px) { .plan-output { padding: 20px 16px; } }
+
+.plan-curriculum-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-soft); border: 1px solid var(--rule); border-radius: 3px;
+  padding: 4px 10px; margin-bottom: 14px;
+}
+.plan-meta-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; margin-bottom: 2px; }
+.plan-meta-cell { padding: 9px 13px; border: 1px solid var(--rule); font-size: 0.91rem; }
+.plan-meta-cell .lbl { color: var(--ink-soft); font-size: 0.8rem; display: block; margin-bottom: 2px; }
+.plan-meta-cell strong { font-family: 'Fraunces', serif; font-weight: 700; }
+.plan-objectives-box { border: 1px solid var(--rule); border-top: none; padding: 13px 15px; margin-bottom: 5px; }
+.plan-objectives-box .title { font-family: 'Fraunces', serif; font-weight: 700; display: block; margin-bottom: 8px; }
+.plan-objectives-box ul { padding-left: 18px; }
+.plan-objectives-box li { margin-bottom: 5px; line-height: 1.5; }
+.plan-bloom-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 1px 7px; border-radius: 2px; margin-left: 6px; vertical-align: middle; }
+.bloom-remember { background: #E3F0FF; color: #2A5DAD; }
+.bloom-understand { background: #E3F5E9; color: #2A6B3A; }
+.bloom-apply { background: #FFF3E0; color: #8A5000; }
+.bloom-analyse { background: #F3E8FF; color: #5B2DA0; }
+.bloom-evaluate { background: #FFE8E8; color: #8A2020; }
+.bloom-create { background: #E0FFF8; color: #0A5C4A; }
+
+.plan-standards-box { border: 1px solid var(--rule); border-top: none; padding: 10px 15px; margin-bottom: 18px; font-size: 0.84rem; color: var(--ink-soft); }
+.plan-standards-box .title { font-weight: 700; color: var(--ink); margin-bottom: 4px; display: block; }
+
+.plan-section-head {
+  font-family: 'Fraunces', serif; font-size: 0.95rem; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink); border-bottom: 1px solid var(--rule); padding-bottom: 5px; margin: 26px 0 11px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.plan-section-head .time-badge {
+  font-family: 'Work Sans', sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+  background: var(--paper-warm); border: 1px solid var(--rule); border-radius: 3px; padding: 2px 8px;
+  color: var(--ink-ghost); text-transform: none;
+}
+
+table.seq-table { width: 100%; border-collapse: collapse; font-size: 0.91rem; margin-bottom: 6px; }
+table.seq-table th {
+  text-align: left; font-family: 'Fraunces', serif; font-size: 0.8rem; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--ink-soft); border: 1px solid var(--rule);
+  padding: 8px 12px; background: rgba(28,46,74,0.04);
+}
+table.seq-table td { border: 1px solid var(--rule); padding: 13px 15px; vertical-align: top; line-height: 1.58; }
+table.seq-table td.phase-name { font-family: 'Fraunces', serif; font-weight: 700; color: var(--ink); white-space: nowrap; width: 120px; }
+table.seq-table td.timing { font-size: 0.8rem; color: var(--ink-ghost); white-space: nowrap; width: 58px; text-align: center; }
+table.seq-table .strategy-chip {
+  display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 2px; margin-bottom: 6px; background: var(--teal-light); color: var(--teal);
+}
+table.seq-table .resource-note { font-size: 0.8rem; color: var(--ink-soft); margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--rule); }
+table.seq-table .differentiation-note {
+  font-size: 0.8rem; margin-top: 8px; padding: 6px 9px; border-radius: 3px;
+  background: var(--amber-light); color: #6B4A00; border-left: 3px solid var(--amber);
+}
+
+.dear-learners {
+  font-family: 'Kalam', cursive; background: rgba(232,165,32,0.14);
+  border-radius: 6px; padding: 11px 15px; margin-top: 10px;
+  color: #5C4A1A; line-height: 1.65; font-size: 0.97rem;
+}
+
+.formative-checks { border: 1px solid var(--rule); padding: 12px 15px; margin-top: 8px; border-radius: 3px; }
+.formative-checks .title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; display: block; color: var(--ink); }
+.formative-checks ul { padding-left: 18px; font-size: 0.88rem; color: var(--ink-soft); }
+.formative-checks li { margin-bottom: 4px; }
+
+/* Differentiation panel */
+.diff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+.diff-card { border: 1px solid var(--rule); border-radius: 4px; padding: 9px 11px; font-size: 0.82rem; }
+.diff-card .dc-head { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+.diff-scaffold { border-top: 2px solid var(--amber); }
+.diff-scaffold .dc-head { color: var(--amber); }
+.diff-core { border-top: 2px solid var(--chalk); }
+.diff-core .dc-head { color: var(--chalk); }
+.diff-stretch { border-top: 2px solid var(--violet); }
+.diff-stretch .dc-head { color: var(--violet); }
+
+/* Resources manifest */
+.resource-manifest { font-size: 0.83rem; color: var(--ink-soft); line-height: 1.6; }
+.resource-manifest .rm-item { display: inline; }
+
+/* Reflection */
+.reflection-card { border: 1px solid var(--rule); border-radius: 3px; padding: 14px 16px; }
+.reflection-card p { font-size: 0.88rem; color: var(--ink-soft); margin-bottom: 10px; line-height: 1.6; }
+.reflection-card ul { padding-left: 18px; font-size: 0.88rem; color: var(--pencil); }
+.reflection-card li { margin-bottom: 6px; line-height: 1.55; }
+.reflection-card .next-steps { margin-top: 14px; font-weight: 700; color: var(--ink); font-size: 0.9rem; }
+.reflection-card .write-lines { margin-top: 8px; }
+.write-line { border-bottom: 1px solid var(--rule-soft); height: 24px; margin-bottom: 2px; }
+
+/* SEN/Inclusion box */
+.inclusion-box { border: 1px solid var(--rule); border-left: 3px solid var(--teal); padding: 10px 14px; margin-top: 6px; font-size: 0.85rem; line-height: 1.6; color: var(--ink-soft); border-radius: 0 3px 3px 0; }
+.inclusion-box .title { font-weight: 700; color: var(--teal); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; display: block; }
+
+/* Assessment evidence trail */
+.evidence-trail { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.evidence-node {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  font-size: 0.72rem; color: var(--ink-soft); gap: 3px; padding: 6px 8px;
+  border: 1px solid var(--rule); border-radius: 4px; min-width: 70px;
+}
+.evidence-node .ev-icon { font-size: 1.2rem; }
+.evidence-node .ev-label { font-weight: 600; letter-spacing: 0.04em; }
+
+/* Slides note */
+.slides-link { font-size: 0.88rem; margin: 0 0 20px; color: var(--ink-soft); }
+.slides-link a { color: var(--margin); }
+
+/* Prior knowledge connection */
+.prior-banner { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 16px; padding: 8px 12px; background: var(--teal-light); border-radius: 4px; border-left: 3px solid var(--teal); line-height: 1.55; }
+
+/* Footer */
+footer.site-note { margin-top: 32px; font-size: 0.77rem; color: var(--ink-ghost); text-align: center; }
+
+/* ── Print ── */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: #fff; }
+  .app-wrap { max-width: none; padding: 0; }
+  .page-head, .form-panel, footer.site-note, .output-toolbar { display: none !important; }
+  .layout { display: block; }
+  .output-card { width: auto; border: none; box-shadow: none; border-radius: 0; margin: 0; }
+  .plan-output { padding: 0; }
+  .empty-state { display: none; }
+  .diff-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app-wrap">
+
+  <header class="page-head">
+    <div class="page-head-left">
+      <h1>Plan <em>Book</em> Pro</h1>
+      <p class="tagline">Advanced offline lesson planning — rules engine, curriculum frameworks, activity banks, instructional design patterns, and adaptive assembly. Nothing leaves this page.</p>
+    </div>
+    <div class="page-head-right">
+      <div class="engine-badge">100% offline · deterministic engine</div>
+      <div class="ledger">
+        Rules Engine · Bloom's Taxonomy · Differentiation Matrix<br>
+        Activity Bank · Curriculum Alignment · SEN Support
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ─ FORM PANEL ─ -->
+    <section class="form-panel">
+      <div class="form-panel-header">
+        <h2>Today's lesson</h2>
+        <div class="tab-row">
+          <button class="tab-btn active" data-tab="core">Core</button>
+          <button class="tab-btn" data-tab="pedagogy">Pedagogy</button>
+          <button class="tab-btn" data-tab="assessment">Assessment</button>
+          <button class="tab-btn" data-tab="options">Options</button>
+        </div>
+      </div>
+
+      <div class="form-body">
+
+        <!-- TAB: Core -->
+        <div class="tab-panel active" id="tab-core">
+          <div class="section-sep">Lesson Identity</div>
+          <div class="field-row">
+            <div class="field"><label for="teacher">Teacher</label><input id="teacher" type="text" value="Rajat Thapa"></div>
+            <div class="field"><label for="grade">Class / Grade</label><input id="grade" type="text" value="VIII" placeholder="e.g. VIII"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="subject">Subject</label><input id="subject" type="text" value="Science" placeholder="e.g. Science"></div>
+            <div class="field"><label for="duration">Time period</label>
+              <select id="duration">
+                <option value="40">40 min (single short)</option>
+                <option value="45" selected>45 min (single)</option>
+                <option value="60">60 min (extended single)</option>
+                <option value="80">80 min (1½ / double)</option>
+                <option value="90">90 min (double)</option>
+                <option value="120">120 min (block)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label for="topic">Unit / Topic <span style="color:var(--margin)">*</span></label><input id="topic" type="text" placeholder="e.g. Photosynthesis, Fractions, The French Revolution"></div>
+          <div class="field"><label for="lessonNum">Lesson number in unit</label>
+            <select id="lessonNum">
+              <option value="intro">Introducing the topic (first lesson)</option>
+              <option value="mid" selected>Developing understanding (mid-unit)</option>
+              <option value="consolidate">Consolidating and practising</option>
+              <option value="apply">Applying to new contexts</option>
+              <option value="review">Reviewing and assessing</option>
+            </select>
+          </div>
+          <div class="field"><label for="outcomes">Learning outcomes / objectives</label><textarea id="outcomes" placeholder="Optional — what should learners be able to do by the end? Leave blank to auto-generate."></textarea></div>
+
+          <div class="section-sep">Learners</div>
+          <div class="field-row">
+            <div class="field"><label for="classSize">Class size</label><input id="classSize" type="number" min="1" value="30"></div>
+            <div class="field"><label for="ability">Ability profile</label>
+              <select id="ability">
+                <option>Mixed ability</option>
+                <option>Mostly on grade level</option>
+                <option>Below grade level — needs scaffolding</option>
+                <option>Above grade level — needs stretch</option>
+                <option>Wide range — significant spread</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label for="sen">Inclusion / SEN notes</label><textarea id="sen" placeholder="Optional — e.g. 2 learners with dyslexia, 1 EAL learner at beginner level, one wheelchair user"></textarea></div>
+
+          <div class="section-sep">Context</div>
+          <div class="field-row">
+            <div class="field"><label for="curriculum">Curriculum framework</label>
+              <select id="curriculum">
+                <option>CDC Nepal</option>
+                <option>Cambridge IGCSE</option>
+                <option>CDC Nepal + Cambridge IGCSE</option>
+                <option>IB MYP</option>
+                <option>National Curriculum (UK)</option>
+                <option>Common Core (US)</option>
+                <option>Other / Custom</option>
+              </select>
+            </div>
+            <div class="field"><label for="textbook">Textbook used</label><input id="textbook" type="text" placeholder="optional"></div>
+          </div>
+          <div class="field"><label for="actual">Prior lesson covered (optional)</label><textarea id="actual" placeholder="What was explored in the previous lesson? This plan will explicitly connect to it."></textarea></div>
+        </div>
+
+        <!-- TAB: Pedagogy -->
+        <div class="tab-panel" id="tab-pedagogy">
+          <div class="section-sep">Instructional Design Mode</div>
+          <div class="field">
+            <label>Primary teaching strategy</label>
+            <div class="mode-pills" id="strategyPills">
+              <div class="mode-pill selected" data-val="adaptive">Adaptive (auto-select)</div>
+              <div class="mode-pill" data-val="direct">Direct Instruction</div>
+              <div class="mode-pill" data-val="inquiry">Inquiry-based</div>
+              <div class="mode-pill" data-val="collaborative">Collaborative Learning</div>
+              <div class="mode-pill" data-val="problemBased">Problem-based</div>
+              <div class="mode-pill" data-val="flipped">Flipped / Socratic</div>
+              <div class="mode-pill" data-val="workshop">Workshop Model</div>
+              <div class="mode-pill" data-val="discussion">Structured Discussion</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Cognitive demand target (Bloom's)</label>
+            <div class="mode-pills" id="bloomPills">
+              <div class="mode-pill selected" data-val="auto">Auto (match grade level)</div>
+              <div class="mode-pill" data-val="remember">Remember</div>
+              <div class="mode-pill" data-val="understand">Understand</div>
+              <div class="mode-pill" data-val="apply">Apply</div>
+              <div class="mode-pill" data-val="analyse">Analyse</div>
+              <div class="mode-pill" data-val="evaluate">Evaluate</div>
+              <div class="mode-pill" data-val="create">Create</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Engagement pattern</label>
+            <div class="mode-pills" id="engagePills">
+              <div class="mode-pill selected" data-val="mixed">Mixed (auto-vary)</div>
+              <div class="mode-pill" data-val="whole">Whole-class led</div>
+              <div class="mode-pill" data-val="groups">Group work dominant</div>
+              <div class="mode-pill" data-val="pairs">Paired work</div>
+              <div class="mode-pill" data-val="individual">Individual / Silent</div>
+              <div class="mode-pill" data-val="station">Station rotation</div>
+            </div>
+          </div>
+          <div class="section-sep">Warmup Style</div>
+          <div class="field">
+            <div class="mode-pills" id="warmupPills">
+              <div class="mode-pill selected" data-val="auto">Auto-select</div>
+              <div class="mode-pill" data-val="retrieval">Retrieval practice</div>
+              <div class="mode-pill" data-val="hook">Curiosity hook</div>
+              <div class="mode-pill" data-val="discussion">Discussion starter</div>
+              <div class="mode-pill" data-val="misconception">Misconception probe</div>
+              <div class="mode-pill" data-val="quickwrite">Quick-write</div>
+              <div class="mode-pill" data-val="visual">Visual stimulus</div>
+            </div>
+          </div>
+          <div class="section-sep">Resources Available</div>
+          <div class="field">
+            <label>Check all that apply</label>
+            <div class="check-grid" id="resourceChecks">
+              <label class="check-item"><input type="checkbox" value="projector"> Projector/screen</label>
+              <label class="check-item"><input type="checkbox" value="whiteboard" checked> Whiteboard</label>
+              <label class="check-item"><input type="checkbox" value="chartpaper"> Chart paper</label>
+              <label class="check-item"><input type="checkbox" value="markers"> Markers/pens</label>
+              <label class="check-item"><input type="checkbox" value="lab"> Lab/equipment</label>
+              <label class="check-item"><input type="checkbox" value="digital"> Devices/computers</label>
+              <label class="check-item"><input type="checkbox" value="cards"> Card sets</label>
+              <label class="check-item"><input type="checkbox" value="textbooks"> Class textbooks</label>
+              <label class="check-item"><input type="checkbox" value="mini_wb"> Mini whiteboards</label>
+              <label class="check-item"><input type="checkbox" value="sticky"> Sticky notes</label>
+              <label class="check-item"><input type="checkbox" value="dice"> Dice/randomisers</label>
+              <label class="check-item"><input type="checkbox" value="manipulatives"> Manipulatives</label>
+            </div>
+          </div>
+          <div class="field"><label for="slides">Slides link (optional)</label><input id="slides" type="url" placeholder="https://docs.google.com/presentation/..."></div>
+        </div>
+
+        <!-- TAB: Assessment -->
+        <div class="tab-panel" id="tab-assessment">
+          <div class="section-sep">Assessment for Learning</div>
+          <div class="field">
+            <label>Exit strategy</label>
+            <div class="mode-pills" id="exitPills">
+              <div class="mode-pill selected" data-val="auto">Auto-select</div>
+              <div class="mode-pill" data-val="exitTicket">Exit ticket</div>
+              <div class="mode-pill" data-val="thinkPairShare">Think-pair-share</div>
+              <div class="mode-pill" data-val="threeTwoOne">3-2-1 Reflection</div>
+              <div class="mode-pill" data-val="peerQuiz">Peer quiz</div>
+              <div class="mode-pill" data-val="whiteboard">Show-me boards</div>
+              <div class="mode-pill" data-val="pollQuestions">Oral poll questions</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Formative checkpoints</label>
+            <div class="mode-pills" id="checkpointPills">
+              <div class="mode-pill selected" data-val="auto">Auto (2 checkpoints)</div>
+              <div class="mode-pill" data-val="1">1 checkpoint</div>
+              <div class="mode-pill" data-val="2">2 checkpoints</div>
+              <div class="mode-pill" data-val="3">3 checkpoints</div>
+              <div class="mode-pill" data-val="continuous">Continuous monitoring</div>
+            </div>
+          </div>
+          <div class="field"><label for="assessmentNotes">Additional assessment requirements</label><textarea id="assessmentNotes" placeholder="e.g. BLE-style structured question, rubric-graded group work, portfolio entry, unit test prep..."></textarea></div>
+          <div class="section-sep">Success Criteria</div>
+          <div class="field">
+            <label>Criteria style</label>
+            <div class="mode-pills" id="criteriaPills">
+              <div class="mode-pill selected" data-val="auto">Auto-generate</div>
+              <div class="mode-pill" data-val="steps">Steps to success</div>
+              <div class="mode-pill" data-val="walts">WALT / WILF</div>
+              <div class="mode-pill" data-val="rubric">Rubric levels</div>
+              <div class="mode-pill" data-val="none">None (teacher decides)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Options -->
+        <div class="tab-panel" id="tab-options">
+          <div class="section-sep">Output Sections</div>
+          <div class="check-grid" id="outputSections" style="gap:10px;">
+            <label class="check-item"><input type="checkbox" value="priorKnowledge" checked> Prior knowledge link</label>
+            <label class="check-item"><input type="checkbox" value="bloomsObjectives" checked> Bloom's tagged objectives</label>
+            <label class="check-item"><input type="checkbox" value="curriculumStandards" checked> Curriculum alignment</label>
+            <label class="check-item"><input type="checkbox" value="timing" checked> Timing column</label>
+            <label class="check-item"><input type="checkbox" value="strategyLabels" checked> Strategy labels</label>
+            <label class="check-item"><input type="checkbox" value="differentiation" checked> Differentiation panel</label>
+            <label class="check-item"><input type="checkbox" value="formativeChecks" checked> Formative checkpoints</label>
+            <label class="check-item"><input type="checkbox" value="resourceManifest" checked> Resource manifest</label>
+            <label class="check-item"><input type="checkbox" value="inclusionBox" checked> Inclusion / SEN section</label>
+            <label class="check-item"><input type="checkbox" value="evidenceTrail" checked> Assessment evidence trail</label>
+            <label class="check-item"><input type="checkbox" value="dearLearners" checked> Dear Learners note</label>
+            <label class="check-item"><input type="checkbox" value="writeLines"> Write lines in reflection</label>
+          </div>
+          <div class="section-sep" style="margin-top:18px;">Plan Variant Seed</div>
+          <p style="font-size:0.8rem;color:var(--ink-ghost);margin-bottom:10px;line-height:1.5;">Same topic, same seed → identical plan. Change the seed to get a completely different sequence of activities from the same inputs.</p>
+          <div class="seed-row">
+            <label>Seed</label>
+            <div class="field" style="flex:1;margin:0;"><input id="variantSeed" type="text" placeholder="leave blank for topic-derived seed"></div>
+            <button onclick="document.getElementById('variantSeed').value=Math.random().toString(36).slice(2,8)">Randomise</button>
+          </div>
+          <div class="section-sep">Language / Locale</div>
+          <div class="field-row">
+            <div class="field"><label for="schoolName">School name (optional)</label><input id="schoolName" type="text" placeholder="e.g. Rato Bangala School"></div>
+            <div class="field"><label for="dateField">Date</label><input id="dateField" type="date"></div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-area">
+          <div class="submit-row">
+            <button class="generate" id="generateBtn"><span class="generate-icon">📋</span> Generate Plan</button>
+            <span class="status" id="statusText"></span>
+          </div>
+          <div class="gen-progress" id="genProgress">
+            <div class="gen-progress-bar"><div class="gen-progress-fill" id="genFill"></div></div>
+            <div class="gen-steps" id="genSteps">
+              <span class="gen-step" id="step-classify">Classify subject</span>
+              <span class="gen-step" id="step-objectives">Build objectives</span>
+              <span class="gen-step" id="step-standards">Align curriculum</span>
+              <span class="gen-step" id="step-intro">Compose introduction</span>
+              <span class="gen-step" id="step-activities">Assemble activities</span>
+              <span class="gen-step" id="step-diff">Differentiation</span>
+              <span class="gen-step" id="step-assess">Assessment layer</span>
+              <span class="gen-step" id="step-reflection">Reflection prompts</span>
+              <span class="gen-step" id="step-render">Render output</span>
+            </div>
+          </div>
+          <div class="error-box" id="errorBox"></div>
+        </div>
+
+      </div><!-- /form-body -->
+    </section>
+
+    <!-- ─ OUTPUT PANEL ─ -->
+    <section class="output-panel">
+      <div class="output-toolbar" id="outputToolbar" style="display:none">
+        <button onclick="copyPlanText()">Copy text</button>
+        <button onclick="exportAsDoc()">Export .doc</button>
+        <button class="primary-tool" onclick="window.print()">Print / PDF (A4)</button>
+      </div>
+      <div class="output-card" id="outputCard">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📖</div>
+          <h3>Nothing stamped yet</h3>
+          <p>Fill in the topic, adjust the pedagogy and assessment tabs, then click <em>Generate Plan</em>.</p>
+          <div class="feature-chips">
+            <span class="feature-chip">Bloom's taxonomy</span>
+            <span class="feature-chip">Differentiation matrix</span>
+            <span class="feature-chip">Activity bank 200+ variants</span>
+            <span class="feature-chip">Curriculum alignment</span>
+            <span class="feature-chip">SEN / Inclusion</span>
+            <span class="feature-chip">Formative checkpoints</span>
+            <span class="feature-chip">Evidence trail</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-note">Plan Book Pro · Completely offline · No data leaves this page · Powered by a deterministic rules engine, not AI</footer>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  PLAN BOOK PRO — ADVANCED OFFLINE DETERMINISTIC GENERATION ENGINE           ║
+// ║  Architecture: Rules Engine + Curriculum Frameworks + Activity Banks        ║
+// ║  + Instructional Design Patterns + Template Composition                     ║
+// ║  + Adaptive Lesson Assembly Algorithms                                      ║
+// ║  Zero AI · Zero network · Zero cloud · Fully deterministic                 ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ═══════════════════════════════════════════════════════
+//  0. UTILITY PRIMITIVES
+// ═══════════════════════════════════════════════════════
+
+// Mulberry32 seeded PRNG
+function makePRNG(seed) {
+  let s = (seed >>> 0) || 0xDEADBEEF;
+  return function() {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hashStr(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function pick(rng, arr) {
+  if (!arr || arr.length === 0) return '';
+  return arr[Math.floor(rng() * arr.length)];
+}
+
+function pickN(rng, arr, n) {
+  const copy = [...arr];
+  const result = [];
+  for (let i = 0; i < Math.min(n, copy.length); i++) {
+    const idx = Math.floor(rng() * (copy.length - i));
+    result.push(copy.splice(idx, 1)[0]);
+  }
+  return result;
+}
+
+function esc(str) {
+  return (str || '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function formatRich(str) {
+  if (!str) return '';
+  let s = esc(str);
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  s = s.replace(/\n{2,}/g, '</p><p>');
+  s = s.replace(/\n/g, '<br>');
+  return '<p>' + s + '</p>';
+}
+
+function plainText(str) {
+  return (str || '').replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+}
+
+// ═══════════════════════════════════════════════════════
+//  1. CLASSIFIERS
+// ═══════════════════════════════════════════════════════
+
+function classifySubject(subject, topic) {
+  const s = ((subject||'') + ' ' + (topic||'')).toLowerCase();
+  if (/\bmath|algebra|geometry|calculus|arithmetic|fraction|decimal|equation|trigon|statistic|probab|number\b/.test(s)) return 'maths';
+  if (/physic|force|motion|energy|wave|light|sound|electric|magnet|heat|pressure|velocity|acceleration|newto|gravity|optic|nuclear/.test(s)) return 'physics';
+  if (/chemi|acid|base|reaction|element|compound|periodic|bond|solution|molecule|atom|titrat|organic|polymer|oxidat|redox/.test(s)) return 'chemistry';
+  if (/bio|cell|organ(?!ic)|plant|animal|ecosy|photosyn|heredit|evolut|digest|respirat|reproduct|classif|human body|genetics|dna|protein|enzyme/.test(s)) return 'biology';
+  if (/science|lab|experiment|hypothesis/.test(s)) return 'science';
+  if (/english|literature|poem|grammar|writing|reading|comprehension|novel|essay|narrative|language|author|text|genre|shakespeare/.test(s)) return 'english';
+  if (/nepali|nepal|साहित्य|व्याकरण/.test(s)) return 'nepali';
+  if (/history|geography|social|civics|environment|society|culture|econom|political|demograph|climate|map/.test(s)) return 'social';
+  if (/computer|programming|coding|software|hardware|ict|algorithm|python|java|html|network|database|logic/.test(s)) return 'computer';
+  if (/art|drawing|painting|craft|design|visual/.test(s)) return 'art';
+  if (/music|instrument|rhythm|melody|harmony|composition/.test(s)) return 'music';
+  if (/pe|sport|exercise|game|fitness|health|athletic/.test(s)) return 'pe';
+  return 'general';
+}
+
+function classifyGrade(grade) {
+  const g = (grade||'').toLowerCase().replace(/grade|class|year/gi,'').trim();
+  const n = parseInt(g) || romanToInt(g);
+  if (n <= 2) return 'primary-early';
+  if (n <= 5) return 'primary';
+  if (n <= 8) return 'middle';
+  if (n <= 10) return 'secondary';
+  return 'advanced';
+}
+
+function romanToInt(s) {
+  const map = {i:1,ii:2,iii:3,iv:4,v:5,vi:6,vii:7,viii:8,ix:9,x:10,xi:11,xii:12,l:50};
+  return map[(s||'').toLowerCase()] || 8;
+}
+
+function parseDuration(d) { return parseInt(d) || 45; }
+
+function parseClassSize(cs) {
+  const n = parseInt(cs) || 30;
+  if (n <= 15) return { n, groups:3, size:Math.ceil(n/3), type:'small' };
+  if (n <= 25) return { n, groups:5, size:Math.ceil(n/5), type:'medium' };
+  if (n <= 35) return { n, groups:6, size:Math.ceil(n/6), type:'standard' };
+  return { n, groups:8, size:Math.ceil(n/8), type:'large' };
+}
+
+function getResources() {
+  const checked = [];
+  document.querySelectorAll('#resourceChecks input:checked').forEach(cb => checked.push(cb.value));
+  return {
+    projector:     checked.includes('projector'),
+    whiteboard:    checked.includes('whiteboard'),
+    chartpaper:    checked.includes('chartpaper'),
+    markers:       checked.includes('markers'),
+    lab:           checked.includes('lab'),
+    digital:       checked.includes('digital'),
+    cards:         checked.includes('cards'),
+    textbooks:     checked.includes('textbooks'),
+    mini_wb:       checked.includes('mini_wb'),
+    sticky:        checked.includes('sticky'),
+    dice:          checked.includes('dice'),
+    manipulatives: checked.includes('manipulatives'),
+    any: checked.length > 0,
+  };
+}
+
+function getOutputSections() {
+  const checked = {};
+  document.querySelectorAll('#outputSections input').forEach(cb => { checked[cb.value] = cb.checked; });
+  return checked;
+}
+
+function getPillValue(containerId) {
+  const sel = document.querySelector(`#${containerId} .mode-pill.selected`);
+  return sel ? sel.dataset.val : 'auto';
+}
+
+function hasCambridge(curriculum) { return /cambridge|igcse|ble/i.test(curriculum||''); }
+function hasIB(curriculum) { return /\bib\b|myo/i.test(curriculum||''); }
+
+// ═══════════════════════════════════════════════════════
+//  2. BLOOM'S TAXONOMY ENGINE
+// ═══════════════════════════════════════════════════════
+
+const BLOOMS = {
+  remember:   { label:'Remember',   color:'bloom-remember',   verbs:['recall','identify','name','list','define','recognise','state','match','label','reproduce'] },
+  understand: { label:'Understand', color:'bloom-understand', verbs:['explain','describe','summarise','classify','interpret','paraphrase','distinguish','compare','outline'] },
+  apply:      { label:'Apply',      color:'bloom-apply',      verbs:['apply','demonstrate','solve','use','calculate','construct','implement','carry out','execute','compute'] },
+  analyse:    { label:'Analyse',    color:'bloom-analyse',    verbs:['analyse','examine','differentiate','break down','infer','compare','contrast','deconstruct','attribute'] },
+  evaluate:   { label:'Evaluate',   color:'bloom-evaluate',   verbs:['evaluate','judge','justify','argue','defend','critique','assess','prioritise','recommend'] },
+  create:     { label:'Create',     color:'bloom-create',     verbs:['create','design','compose','construct','plan','devise','produce','formulate','synthesise','develop'] },
+};
+
+function gradeBloomsDefault(level) {
+  const map = {
+    'primary-early': ['remember','understand'],
+    'primary':       ['understand','apply'],
+    'middle':        ['apply','analyse'],
+    'secondary':     ['analyse','evaluate'],
+    'advanced':      ['evaluate','create'],
+  };
+  return map[level] || ['apply','analyse'];
+}
+
+function resolveBloomsLevel(bloomPref, level) {
+  if (bloomPref && bloomPref !== 'auto') return [bloomPref];
+  return gradeBloomsDefault(level);
+}
+
+function bloomVerb(levels, rng) {
+  const level = pick(rng, levels);
+  return { level, verb: pick(rng, BLOOMS[level].verbs), meta: BLOOMS[level] };
+}
+
+// ═══════════════════════════════════════════════════════
+//  3. CURRICULUM STANDARDS ALIGNMENT LIBRARY
+// ═══════════════════════════════════════════════════════
+
+const CURRICULUM_STANDARDS = {
+  'CDC Nepal': {
+    maths: ['Demonstrates conceptual understanding and computational fluency', 'Applies mathematical processes to real-life problem-solving', 'Communicates mathematical reasoning using appropriate symbols and notation'],
+    science: ['Investigates natural phenomena through structured inquiry', 'Applies scientific principles to explain everyday observations', 'Records and communicates findings using appropriate scientific language'],
+    biology: ['Understands life processes at the cellular and organismal level', 'Connects biological concepts to human health and the environment', 'Demonstrates practical skills in biological investigation'],
+    physics: ['Applies laws of physics to analyse and predict physical phenomena', 'Uses quantitative methods to solve problems in mechanics, energy, and waves', 'Designs and evaluates simple physical investigations'],
+    chemistry: ['Understands the structure and properties of matter at the particulate level', 'Applies chemical principles to explain reactions and transformations', 'Handles laboratory materials safely and records experimental data'],
+    english: ['Demonstrates reading comprehension across a range of texts and genres', 'Writes accurately and effectively for a variety of purposes and audiences', 'Listens actively and communicates clearly in spoken contexts'],
+    social: ['Understands the interdependence of natural and human systems', 'Analyses historical and contemporary social issues using evidence', 'Demonstrates civic awareness and values in everyday decisions'],
+    computer: ['Applies computational thinking to decompose and solve problems', 'Designs and tests algorithms using programming and pseudocode', 'Uses digital tools responsibly and effectively'],
+    general: ['Engages with subject-specific content with curiosity and persistence', 'Demonstrates understanding through multiple modes of representation', 'Reflects on learning and identifies next steps independently'],
+  },
+  'Cambridge IGCSE': {
+    maths: ['AO1: Mathematical techniques and procedures (knowledge and recall)', 'AO2: Mathematical reasoning and problem-solving in context', 'AO3: Presentation of mathematical argument and justification'],
+    science: ['AO1: Knowledge and understanding of scientific facts and concepts', 'AO2: Application of scientific knowledge to familiar and unfamiliar contexts', 'AO3: Analysis, evaluation and planning of practical investigations'],
+    biology: ['B1: Cell biology and transport across membranes', 'B2: Biological molecules, enzymes, and metabolic processes', 'B3: Ecology, classification and evolutionary relationships'],
+    physics: ['P1: Motion, forces and energy — core concepts and calculations', 'P2: Waves, light, sound and electromagnetic spectrum', 'P3: Electricity, magnetism and modern physics'],
+    chemistry: ['C1: Atomic structure, bonding and periodic table trends', 'C2: Energetics, rates and equilibrium of chemical reactions', 'C3: Organic chemistry and analysis'],
+    english: ['R1: Reading comprehension — information and ideas', 'R2: Inference and interpretation of language and structure', 'W1: Directed writing and summary composition'],
+    social: ['Understanding of spatial, temporal and causal relationships', 'Evaluation of sources and perspectives using historical/geographical evidence', 'Communication of structured argument and informed judgement'],
+    general: ['Knowledge and understanding of core content', 'Application and analysis in familiar and novel contexts', 'Evaluation, synthesis and extended written communication'],
+  },
+  'IB MYP': {
+    maths: ['Criterion A: Knowing and understanding — applying mathematical knowledge', 'Criterion B: Investigating patterns — exploring mathematical regularities', 'Criterion C: Communicating — using mathematical language and representation', 'Criterion D: Applying mathematics in real-life contexts'],
+    science: ['Criterion A: Knowing and understanding scientific concepts', 'Criterion B: Inquiring and designing investigations', 'Criterion C: Processing and evaluating experimental data', 'Criterion D: Reflecting on the impact of science'],
+    general: ['Criterion A: Knowing and understanding core content', 'Criterion B: Critical thinking and inquiry', 'Criterion C: Communication in the subject-specific language', 'Criterion D: Connecting to broader contexts (ATL)'],
+  },
+};
+
+function getStandards(curriculum, subType) {
+  const fw = curriculum || 'CDC Nepal';
+  const key = Object.keys(CURRICULUM_STANDARDS).find(k => fw.includes(k.split(' ')[0])) || 'CDC Nepal';
+  const bank = CURRICULUM_STANDARDS[key] || CURRICULUM_STANDARDS['CDC Nepal'];
+  return bank[subType] || bank['general'] || bank['science'];
+}
+
+// ═══════════════════════════════════════════════════════
+//  4. OBJECTIVES GENERATOR
+// ═══════════════════════════════════════════════════════
+
+const SECOND_OBJECTIVE_BANK = {
+  maths:    ['apply the method to at least two multi-step problems, showing all working', 'identify and correct errors in a worked example, explaining the mistake clearly', 'extend the pattern or rule to a generalised case with justification'],
+  physics:  ['connect the concept to a real-world context observed in everyday life', 'design a simple experiment to test one related hypothesis, identifying variables', 'interpret data from a given investigation and draw a physics-based conclusion'],
+  chemistry:['write and balance relevant equations or draw accurate particle diagrams', 'compare properties or behaviours of substances, using correct scientific vocabulary', 'evaluate the safety and environmental impact of the reaction or process'],
+  biology:  ['label and annotate the relevant structure or process using precise terminology', 'connect this concept to the broader unit theme with at least one clear biological link', 'explain the adaptive significance of the structure or process studied'],
+  science:  ['communicate findings using appropriate scientific language and visual representations', 'evaluate the quality of evidence gathered and suggest improvements to the investigation', 'connect the scientific concept to a real-world application or current issue'],
+  english:  ['apply the identified language feature in an original piece of writing', "evaluate how the writer's choices reflect their purpose and intended audience", 'compare this text to another, identifying similarities and differences in technique'],
+  social:   ['evaluate at least two different perspectives on the issue using evidence', 'connect the topic to their own community, nation or current events with specific examples', 'construct a reasoned written or spoken argument, drawing on multiple sources'],
+  computer: ['write, test, and debug a short program or algorithm to solve a specified problem', 'trace through code examples and predict output at each stage, explaining the logic', 'evaluate the efficiency of their solution and suggest at least one improvement'],
+  general:  ['apply their learning to a novel scenario and explain the reasoning behind their approach', 'reflect on their own understanding and identify one area for further study', 'collaborate productively and articulate what each team member contributed'],
+};
+
+function generateObjectives(data, rng, bloomLevels) {
+  const { subject, topic, outcomes, grade } = data;
+  const subType = classifySubject(subject, topic);
+  const level = classifyGrade(grade||'');
+  const t = topic || subject || 'this topic';
+  const shortT = t.length > 35 ? t.split(/[ ,]/)[0] : t;
+
+  // Parse user-supplied outcomes
+  if (outcomes && outcomes.trim().length > 10) {
+    const lines = outcomes.split(/[\n;,]/).map(l => l.trim()).filter(l => l.length > 6);
+    if (lines.length >= 3) return lines.slice(0, 3).map(l => polishObjective(l, rng));
+    if (lines.length === 2) return [polishObjective(lines[0], rng), polishObjective(lines[1], rng)];
+    if (lines.length === 1) {
+      const bv = bloomVerb(bloomLevels, rng);
+      const second = pick(rng, SECOND_OBJECTIVE_BANK[subType] || SECOND_OBJECTIVE_BANK.general);
+      return [polishObjective(lines[0], rng), `Learners will ${second}`];
+    }
+  }
+
+  // Auto-generate from subject + topic + Bloom's
+  const bv1 = bloomVerb(bloomLevels, rng);
+  const bv2 = bloomVerb(bloomLevels.slice().reverse(), rng);
+
+  const subjectVerbContexts = {
+    maths:    [`${bv1.verb} the key properties and procedures of **${shortT}**, showing clear step-by-step reasoning`, `${bv2.verb} ${shortT} in at least two different types of problem, including one multi-step or applied question`],
+    physics:  [`${bv1.verb} the physical principles behind **${shortT}** and express relationships using correct formulae and units`, `${bv2.verb} how **${shortT}** explains observable real-world phenomena, with reference to at least one concrete example`],
+    chemistry:[`${bv1.verb} the chemical concepts and equations associated with **${shortT}**, using precise scientific vocabulary`, `${bv2.verb} experimental observations or data related to **${shortT}** to draw conclusions with reasoned justification`],
+    biology:  [`${bv1.verb} the structure, function or process of **${shortT}** using accurate biological terminology`, `${bv2.verb} how **${shortT}** relates to broader themes in the unit — homeostasis, adaptation, or systems thinking`],
+    science:  [`${bv1.verb} the scientific principles underpinning **${shortT}** through guided investigation and structured discussion`, `${bv2.verb} findings clearly using scientific language, diagrams, and appropriate units of measurement`],
+    english:  [`${bv1.verb} how the writer uses language, structure and form in the context of **${shortT}**`, `${bv2.verb} the same techniques in original writing, demonstrating awareness of purpose, audience and effect`],
+    social:   [`${bv1.verb} the key causes, features, or significance of **${shortT}** using appropriate subject-specific vocabulary`, `${bv2.verb} two or more perspectives on **${shortT}** and form a reasoned judgement supported by evidence`],
+    computer: [`${bv1.verb} the logic and application of **${shortT}** by tracing through worked examples step by step`, `${bv2.verb} **${shortT}** by writing, testing, or modifying a relevant algorithm, program, or pseudocode sequence`],
+    general:  [`${bv1.verb} the core concepts of **${shortT}** and explain them in their own words with supporting examples`, `${bv2.verb} their understanding to an unfamiliar scenario or challenge with increasing independence`],
+  };
+
+  const pair = subjectVerbContexts[subType] || subjectVerbContexts.general;
+  return [
+    `By the end of this lesson, learners will be able to ${pair[0]}`,
+    `Learners will ${pair[1]}`,
+  ];
+}
+
+function polishObjective(raw, rng) {
+  const prefixes = ['By the end of this lesson, learners will be able to ', 'Learners will be able to '];
+  const lower = raw.toLowerCase();
+  if (!lower.match(/^(by the end|learners will|students will|pupils will)/)) {
+    return pick(rng, prefixes) + raw.charAt(0).toLowerCase() + raw.slice(1);
+  }
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+// ═══════════════════════════════════════════════════════
+//  5. TIMING CALCULATOR
+// ═══════════════════════════════════════════════════════
+
+function calculateTimings(minutes) {
+  if (minutes <= 45) {
+    return { intro:8, main:25, summary:8, buffer:4 };
+  } else if (minutes <= 60) {
+    return { intro:10, main:35, summary:10, buffer:5 };
+  } else if (minutes <= 80) {
+    return { intro:10, main:50, part2:15, summary:10, buffer:5 };
+  } else {
+    return { intro:12, main:40, part2:25, summary:15, buffer:8 };
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  6. WARMUP ENGINE — Strategy × Subject × Pedagogy
+// ═══════════════════════════════════════════════════════
+
+const WARMUP_BANK = {
+  retrieval: {
+    maths:    [
+      `The teacher opens with **cold-call retrieval**: three questions on the board covering last lesson's concepts. Learners answer individually on mini-whiteboards or paper — no notes. The teacher scans responses and targets two or three to discuss before revealing answers. Incorrect responses are treated as "interesting mistakes" and explored briefly.`,
+      `A **two-minute brain dump**: learners write every formula, rule, or method they associate with the previous topic. Partners compare lists. The class creates a consolidated list on the board, which stays visible throughout the lesson.`,
+    ],
+    science:  [
+      `**Retrieval quiz**: the teacher displays four short questions reviewing key vocabulary, diagrams, or concepts from the previous lesson. Learners complete individually in 90 seconds, then peer-mark. Any item that fewer than half the class answered correctly is briefly revisited.`,
+      `The teacher projects a diagram or equation from the previous lesson with labels removed. Learners reconstruct labels and terms from memory before comparing with a partner.`,
+    ],
+    english:  [
+      `**Quote flashback**: the teacher reads a short passage from the previous text studied. Learners write three things they remember about it — technique, effect, or context — without prompting. Volunteers share, and the teacher draws a thread to today's focus.`,
+      `A **vocabulary retrieval race**: five terms from last lesson are displayed. Learners write definitions without looking at notes. Partners check each other. Any misremembered definitions are clarified aloud.`,
+    ],
+    general:  [
+      `**Low-stakes retrieval check**: the teacher poses three short questions linked to the previous lesson. Learners respond in writing — no conferring — before partners compare. Misconceptions are noted and addressed in the first minute of the main activity.`,
+      `The teacher reveals a partially completed concept map from last session and asks learners to fill in the missing connections — individually, then with a partner.`,
+    ],
+  },
+  hook: {
+    maths:    [
+      `The teacher opens with a **counterintuitive result**: a calculation that produces a surprising answer, or a visual paradox connected to **${'{t}'}**. *How is that possible?* Learners speculate before the teacher reveals the logic — which turns out to be the heart of today's concept.`,
+      `A **number of the day** linked to **${'{t}'}**: the teacher writes one number on the board and asks learners to generate five different mathematical statements about it. The richest responses are built into the lesson's opening.`,
+    ],
+    science:  [
+      `The teacher performs a brief **curiosity demonstration** — a colour change, a surprising reaction, or a counterintuitive physical effect — before any explanation. Learners observe silently, then write one question it raises. These questions guide the teacher's introduction.`,
+      `A single striking **photograph or data point** connected to **${'{t}'}** is displayed. The teacher asks: *What do you notice? What does this make you wonder?* Learner questions are catalogued on the board and revisited by the lesson's end.`,
+    ],
+    english:  [
+      `The teacher reads aloud the opening line of the text (or a key quotation) with no context, then asks: *Who might have said this? When? Why?* Learner responses are taken without correction — they will revisit their guesses at the lesson's close.`,
+      `A visual image — an artwork, photograph, or advertisement — tangentially related to the text's themes is displayed. Learners write two inferences and one question. Their instincts prime them for the analytical work ahead.`,
+    ],
+    general:  [
+      `The teacher opens with a **provocation**: a surprising statistic, a brief story, or a puzzle directly connected to **${'{t}'}**. Learners share a one-sentence reaction with a partner before the teacher uses their responses to launch the lesson's first concept.`,
+      `A **mystery object or scenario** is placed at the front or described aloud. Learners ask yes/no questions (maximum five total, class-wide) to identify the connection to today's topic before the teacher makes it explicit.`,
+    ],
+  },
+  discussion: {
+    general: [
+      `The teacher poses a **discussion starter** — a question with no single correct answer — and gives learners ninety seconds to think before sharing. *Is [concept] always true? When might it fail? Does [process] apply in all contexts?* Three or four responses are taken and the divergence in opinions is noted as a thread to return to.`,
+      `A **position line** prompt: the teacher reads a statement about **${'{t}'}** and asks learners to physically position themselves on a spectrum from "strongly agree" to "strongly disagree." The teacher briefly asks two or three learners to explain their position before moving on.`,
+    ],
+  },
+  misconception: {
+    maths:    [
+      `The teacher projects a piece of **worked student work** (anonymised) that contains a common misconception related to **${'{t}'}**. Learners identify the error and explain why it is wrong — before the teacher confirms and contextualises. This primes alertness for the main activity.`,
+      `**True or false with justification**: the teacher reads three statements about **${'{t}'}** — some correct, some containing classic errors. Learners signal their answer and must explain their reasoning before the teacher confirms.`,
+    ],
+    science:  [
+      `The teacher states a common **naive belief** about **${'{t}'}** — one that many learners arrive with — and asks: *Is this actually true?* Learners vote, then debate briefly. The correct scientific explanation is withheld until after the main activity.`,
+    ],
+    general:  [
+      `Three statements appear on the board. One is correct. Two contain misconceptions. Learners work in pairs to identify the correct statement and diagnose the error in the other two. The class votes, then discusses.`,
+    ],
+  },
+  quickwrite: {
+    general: [
+      `A **one-minute free-write**: learners respond continuously to the prompt *Everything I know or think about [topic] is…* without lifting their pen. After 60 seconds, partners compare notes and together write the single most important idea from their combined lists.`,
+      `**The 60-second expert**: each learner writes as if they are explaining **${'{t}'}** to a friend who has never heard of it. Three explanations are shared aloud, and the teacher notes what was captured well and what will need to be developed in the lesson.`,
+    ],
+  },
+  visual: {
+    general: [
+      `A diagram, infographic, or image related to **${'{t}'}** is projected without any labels or text. Learners spend 45 seconds identifying everything they can see, then 45 seconds inferring what it might represent. The teacher reveals context after learners have committed to their interpretations.`,
+      `The teacher draws or projects a partially completed diagram and asks learners to predict what the missing elements are and why they belong there. Their responses guide the teacher's introduction of the content.`,
+    ],
+  },
+  auto: { general: [] }, // resolved at runtime
+};
+
+function resolveWarmupBank(subType, warmupStyle, topic, rng) {
+  const t = topic || 'today\'s topic';
+  const short = t.length > 35 ? t.split(/[ ,]/)[0] : t;
+
+  const style = warmupStyle === 'auto'
+    ? pick(rng, ['retrieval','hook','discussion','misconception','quickwrite','visual'])
+    : warmupStyle;
+
+  const bank = WARMUP_BANK[style] || WARMUP_BANK.auto;
+  const pool = bank[subType] || bank.general || WARMUP_BANK.hook.general;
+  const template = pick(rng, pool);
+  if (!template) {
+    return `The lesson opens with a brief orienting activity. Learners spend 60 seconds writing what they already know about **${short}** before sharing with a partner. Two or three responses are taken publicly to gauge the class's starting point.`;
+  }
+  return template.replace(/\$\{'\{t\}'\}/g, short).replace(/\${t}/g, short).replace(/\[topic\]/g, short).replace(/\[concept\]/g, short).replace(/\[process\]/g, short);
+}
+
+// ═══════════════════════════════════════════════════════
+//  7. HOUSE RULES ENGINE (varied phrasings)
+// ═══════════════════════════════════════════════════════
+
+const HOUSE_RULES_BANK = [
+  (rng) => `The teacher settles the class using a countdown from five. Four classroom agreements are restated briefly: ${pick(rng, ['"one mic, one voice"', '"one speaker at a time"', 'the one-voice rule'])}, ${pick(rng, ['hand-raising before speaking', 'raised hands for contributions', 'the hand-raising norm'])}, active listening, and respect for shared materials. The call-response (HELLO → HI) marks the formal start of the lesson.`,
+  (rng) => `The class is brought to attention using ${pick(rng, ['a silent five-second countdown', 'the class countdown (5–4–3–2–1)', 'the countdown gesture'])}. The teacher reminds learners of three shared norms: ${pick(rng, ['one speaker at a time', '"one mic"'])}, full presence (phones away, eyes forward), and the right to make mistakes publicly. The HELLO–HI signal confirms readiness.`,
+  (rng) => `${pick(rng, ['The teacher uses the countdown to bring the room to readiness.', 'A countdown from five gathers attention.'])} Before beginning, four agreements are restated: ${pick(rng, ['one voice at a time', 'the one-mic rule'])}, ${pick(rng, ['hands raised before speaking', 'hand signals for contributions'])}, active listening ("ears on, phones away"), and care for all materials in the room. The HELLO / HI exchange opens the lesson.`,
+];
+
+// ═══════════════════════════════════════════════════════
+//  8. DEAR LEARNERS BANK
+// ═══════════════════════════════════════════════════════
+
+const DEAR_LEARNERS_BANK = [
+  (t, sub) => `Dear learners,\n\nToday we explore **${t}**. I want you to come to this lesson with genuine curiosity — not just about the right answers, but about the questions themselves. If something confuses you, say so. If something surprises you, share it. That's where the real learning lives.\n\nYour teacher`,
+  (t, sub) => `Dear learners,\n\n**${t}** is one of those topics that connects in more ways than you might expect — to things you've already seen, already done, already wondered about. Don't wait until you feel confident. Start now. The confidence comes from doing the work, not before it.\n\nYour teacher`,
+  (t, sub) => `Dear learners,\n\nI'm genuinely looking forward to this lesson on **${t}**. I know some of you find this area of ${sub||'the subject'} challenging — and that's completely understandable. What I ask is that you stay in it. Ask your questions. Support your partners. The trickiest parts usually turn out to be the most interesting ones.\n\nYour teacher`,
+  (t, sub) => `Dear learners,\n\nBefore we begin: be brave. **${t}** might feel unfamiliar. That's the point. Today we're here to build understanding together — step by step. Make mistakes in front of each other. Correct each other kindly. That's how a class like ours learns.\n\nYour teacher`,
+  (t, sub) => `Dear learners,\n\nA simple ask before we start: give this lesson your full presence. **${t}** requires your thinking — not your performance, not perfection, just real engagement. I'll do my part. You bring yours.\n\nYour teacher`,
+];
+
+// ═══════════════════════════════════════════════════════
+//  9. INTRODUCTION GENERATOR
+// ═══════════════════════════════════════════════════════
+
+function generateIntroduction(data, rng, warmupStyle, opts) {
+  const { topic, subject, actual, teacher } = data;
+  const subType = classifySubject(subject, topic);
+  const t = topic || subject || 'today\'s topic';
+
+  // Prior lesson connector
+  let priorBlock = '';
+  if (actual && actual.trim().length > 5) {
+    const prevSummary = actual.trim().split('.')[0].toLowerCase();
+    priorBlock = pick(rng, [
+      `Building directly on the previous lesson — *${prevSummary}* — today's work takes the next logical step forward.`,
+      `In the prior session, the class explored *${prevSummary}*; this lesson builds on that foundation and extends understanding further.`,
+      `Following on from *${prevSummary}*, this lesson deepens and applies the concepts already introduced.`,
+    ]);
+  }
+
+  const warmup = resolveWarmupBank(subType, warmupStyle, t, rng);
+  const houseRules = pick(rng, HOUSE_RULES_BANK)(rng);
+  const dearLearners = pick(rng, DEAR_LEARNERS_BANK)(t, subject);
+
+  return { priorBlock, warmup, houseRules, dearLearners };
+}
+
+// ═══════════════════════════════════════════════════════
+//  10. ACTIVITY BANKS — Core pedagogical patterns
+// ═══════════════════════════════════════════════════════
+
+// Group formation patterns
+const GROUP_FORMATIONS = [
+  'Groups are formed by counting off around the room',
+  'The teacher assigns groups in advance, balancing abilities and personalities',
+  'Learners self-select partners, with the teacher adjusting one or two pairings',
+  'Groups are determined by a coloured-card draw — adding an element of productive randomness',
+  'Seating rows are used as groups to minimise transition time',
+  'The teacher uses a strategic grouping strategy — stronger learners are distributed evenly across groups',
+  'Learners rotate to new partners using the clock-partner system established earlier in the term',
+];
+
+// Note-taking prompts
+const NOTE_PROMPTS = {
+  maths:    ['Learners show all working in their books — method marks matter as much as the final answer.', 'Every step of the solution process is recorded — the teacher circulates to ensure working is clear and legible.'],
+  science:  ['Key observations and sketches are recorded in notebooks as the activity progresses, using labelled diagrams where relevant.', 'Key terms and definitions are noted as they arise — learners are encouraged to use their own words rather than copying verbatim.'],
+  english:  ['Learners annotate directly on the text or use the provided structured note frame.', 'Textual evidence is recorded with page references or line numbers — learners practise embedding quotation within sentence.'],
+  general:  ['Learners maintain a running record of key ideas, questions, and their own emerging understanding in their notebooks.', 'The teacher checks that notes are purposeful — prompting learners who have written little to capture at least three core ideas.'],
+};
+
+// Questioning probes by subject
+const QUESTIONING_PROBES = {
+  maths:    ['*Why does this work? What would change if…? Can you show me another way?*', '*What tells you to use that method here? Where might this rule break down?*', '*Is there a pattern? Can you generalise from these examples?*'],
+  physics:  ['*Why does this happen? What would change if we doubled the mass? Which variable is constant?*', '*Can you predict the outcome before we calculate? What does the formula tell us about the relationship?*'],
+  chemistry:['*What happens at the particle level here? Why does temperature affect the rate? What would a graph of this look like?*', '*What evidence do you have for that conclusion? Is correlation here the same as causation?*'],
+  biology:  ["*What would happen if this structure didn't function correctly? How does this relate to what we studied last week?*", '*Where else in the body (or ecosystem) does this principle apply? Why might evolution have produced this?*'],
+  english:  ['*Don\'t tell me what it says — tell me what it does and why. What effect does that choice have on a reader?*', '*Is there a different interpretation? What does the context tell us about the writer\'s intentions?*'],
+  social:   ['*Whose perspective is missing here? Is this cause or consequence? What do we need to know before we can judge?*', '*Would this be true in another context? What does this source not tell us?*'],
+  computer: ['*What will this line do? What happens if the input is zero or negative? How could you make this more efficient?*', '*Can you trace through this step by step? At which point does it fail, and why?*'],
+  general:  ['*Can you explain that in your own words? What makes you say that? What would need to be different for this to be untrue?*', '*What connections can you make? What surprised you? What do you still want to understand?*'],
+};
+
+// ─── MATHS ACTIVITY PATTERNS ───────────────────────────────────────────────
+
+const MATHS_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher introduces the concept using the **I Do / We Do / You Do** sequence. In the *I Do* phase, a fully worked example is annotated step by step on the board, with the teacher narrating the thought process — including what to look for, and what errors to avoid.
+
+In the *We Do* phase, the class works through a second example together. ${res.mini_wb ? 'Learners show their working on mini-whiteboards, allowing the teacher to scan the room for errors instantly.' : 'Learners write the next step in their books before the teacher reveals it.'} The teacher uses ${pick(rng, QUESTIONING_PROBES.maths)} to deepen reasoning beyond procedural recall.
+
+In the *You Do* phase, learners work individually or in groups of ${gs} (${gn} groups). ${formation}. The task involves a sequenced set of problems on **${t}**, increasing in difficulty from procedural to multi-step to applied. ${scaffold ? '\n\n**Scaffold support:** A reference sheet with annotated examples and formula prompts is provided for learners who need it.' : stretch ? '\n\n**Stretch task:** An open-ended extension problem requires learners to construct their own example that satisfies a given set of constraints.' : mixed ? '\n\n**Mixed-ability grouping:** The teacher has prepared three tiers of task — entry, core, and extension. Groups self-select their starting point after reading the first question.' : ''}
+
+${note}
+
+${res.projector ? 'Solutions are projected at intervals so learners can self-check before continuing.' : 'Selected learners are invited to present solutions at the board — the class checks each step and offers amendments.'}${cambridge ? '\n\n**Cambridge link:** The teacher briefly models the mark-scheme language expected in a structured IGCSE question, and learners attempt one past-paper style question individually before the summary.' : ''}`,
+
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef} — Concept Exploration**
+
+The teacher opens the core activity with a **predict–check–explain** cycle. Three problems of increasing complexity are posted on the board simultaneously. Learners first estimate or predict the answer to each, record their prediction, then work through the solution. At the end, they compare their prediction to the computed answer and reflect: *Where was I right? Where did my intuition mislead me?*
+
+Learners are grouped in ${gs}s (${gn} groups). ${formation}. Each group is given a different starting problem, solving and then rotating problems clockwise. This carousel structure ensures every group engages with all three levels of difficulty. ${scaffold ? 'Partial solutions are provided for the first problem in each set.' : stretch ? 'Groups who complete all three problems design a fourth question that would fit the sequence, ready to challenge another group.' : ''}
+
+${note} ${pick(rng, QUESTIONING_PROBES.maths)}
+
+${cambridge ? '\n\nFollowing the group rotation, learners attempt a BLE-style structured question individually and self-mark using a displayed mark scheme.' : ''}`,
+];
+
+// ─── PHYSICS ACTIVITY PATTERNS ─────────────────────────────────────────────
+
+const PHYSICS_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher introduces **${t}** through a ${pick(rng, ['predict–observe–explain (POE)', 'theory → application → investigation', 'demonstration → data → derivation'])} structure. ${res.lab ? 'Equipment is distributed and safety briefing given before the experiment begins. Learners record predictions in their books before observations are made.' : 'A demonstration is carried out at the front of the class — learners record their predictions, then observations, using a provided table.'}
+
+Working in groups of ${gs}, learners ${pick(rng, ['complete a structured investigation, recording measurements and calculating derived quantities', 'work through a set of graded numerical problems, building from formula recall to multi-step application', 'build a simple model and test a prediction, then compare with theoretical values'])}. ${formation}.
+
+${scaffold ? '\n**Scaffold support:** Formula reference sheets with unit annotations and partially completed tables are provided.' : stretch ? '\n**Stretch task:** An extension investigation requires learners to plot a graph from their data, determine a gradient, and relate it to a physical constant.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.physics)}${cambridge ? '\n\n**Cambridge link:** A past-paper style question on this topic is attempted individually at the end of the group task.' : ''}`,
+];
+
+// ─── CHEMISTRY ACTIVITY PATTERNS ───────────────────────────────────────────
+
+const CHEMISTRY_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher introduces **${t}** by ${pick(rng, ['building the key diagram or equation on the board component by component, asking learners to predict each next element before revealing it', 'showing a brief demonstration or chemical reaction and connecting it to the underlying theory through structured questioning', 'presenting a structured set of notes and building on them through Socratic dialogue — never stating information the class can reason out itself'])}.
+
+Learners work in groups of ${gs} (${gn} groups). ${formation}. ${res.lab ? 'Each group carries out a practical task following a safety-checked procedure, recording observations systematically and drawing preliminary conclusions from their data.' : 'Each group receives a data set, a diagram sequence, or a case study to analyse and interpret using the principles introduced.'}
+
+${scaffold ? '\n**Scaffold support:** Sentence starters, a vocabulary bank, and a partially completed results table are available at the teacher\'s desk for groups who request them.' : stretch ? '\n**Stretch task:** An additional problem requires learners to predict what would happen under different conditions (temperature, concentration, pressure) and justify their prediction using chemical theory.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.chemistry)}${cambridge ? '\n\n**Cambridge link:** The teacher models the expected style of a structured chemistry response for this topic. Learners attempt one question individually.' : ''}`,
+];
+
+// ─── BIOLOGY ACTIVITY PATTERNS ─────────────────────────────────────────────
+
+const BIOLOGY_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher presents **${t}** through ${pick(rng, ['progressive diagram construction', 'annotated model analysis', 'structured note-completion with student-generated examples'])}. ${res.projector ? 'The diagram is projected and built up section by section, with learners predicting each label before it is revealed.' : 'The teacher draws the diagram on the board progressively, pausing at each structure for learners to identify and name it.'}
+
+In groups of ${gs}, learners ${pick(rng, ['complete a structured diagram task and answer comprehension questions ranked by difficulty', 'match process descriptions to the correct stage in a sequence using card sets', 'create an annotated visual summary of the topic using chartpaper and markers'])}. ${formation}. ${res.chartpaper ? 'Chartpaper and markers are available for groups working on display summaries.' : ''}
+
+${scaffold ? '\n**Scaffold support:** A partially labelled diagram is provided for groups who need a starting point. Key terminology is listed on a vocabulary card.' : stretch ? '\n**Stretch task:** Learners compare two closely related structures or processes, constructing a Venn diagram and identifying the functional significance of the differences.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.biology)}${cambridge ? '\n\n**Cambridge link:** A IGCSE-style structured question on this diagram or process is attempted individually.' : ''}`,
+];
+
+// ─── ENGLISH ACTIVITY PATTERNS ─────────────────────────────────────────────
+
+const ENGLISH_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef} — ${pick(rng, ['close reading and annotation', 'guided textual analysis', 'structured writing workshop', 'model-analyse-write sequence'])}**
+
+The teacher models the target skill explicitly — ${pick(rng, ['identifying and explaining language techniques at the word, sentence, and text level', 'structuring a well-supported analytical paragraph using P–E–E or equivalent', 'selecting and embedding evidence from the text with precision and effect'])} — using a short extract on the board. The teacher narrates internal reasoning aloud: *I notice… this suggests… the effect on the reader is… the writer may have chosen this because…*
+
+Learners then work in ${pick(rng, [`pairs`, `groups of ${gs}`, 'a writing trio'])} on their own extract or task. ${formation}. The task requires learners not merely to identify techniques but to explain their effect on the reader and connect them to the writer's purpose or the text's context. ${scaffold ? '\n\n**Scaffold support:** A writing frame (P–E–E or PEEL) is provided, along with a vocabulary card of analytical terminology.' : stretch ? '\n\n**Stretch task:** Learners compare two extracts or writers, structuring a comparative analysis that considers how context shapes the language choices made.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.english)}`,
+];
+
+// ─── SOCIAL STUDIES ACTIVITY PATTERNS ─────────────────────────────────────
+
+const SOCIAL_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher presents the key content of **${t}** through ${pick(rng, ['a structured note-taking sequence with regular comprehension checks', 'an annotated source, image or case study displayed at the front with teacher-guided questioning', 'a short direct instruction segment followed by open discussion of the implications'])}. The teacher pauses at two points to ask learners to summarise what they've heard in one sentence — a forced-retrieval strategy that improves retention.
+
+Learners are grouped into teams of ${gs} (${gn} teams). ${formation}. The group task requires learners to ${pick(rng, ['sort statements into categories and justify each placement with a reason', 'build a cause-and-effect chain or timeline on chartpaper, ranking causes by significance', 'analyse a source or scenario and prepare a brief, structured response to present to the class'])}. ${res.chartpaper ? 'Chartpaper and markers are available for displayed work.' : ''}
+
+${scaffold ? '\n**Scaffold support:** Key vocabulary is pre-taught and displayed. Sentence starters are available for the group discussion and written task.' : stretch ? '\n**Stretch task:** Learners are asked to consider an alternative viewpoint not represented in the sources, evaluate the reliability of one source, or connect the issue to a current news story.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.social)}
+
+Groups share findings through a brief presentation or gallery walk. The teacher draws connections between responses and surfaces any divergences for whole-class consideration.`,
+];
+
+// ─── COMPUTER SCIENCE ACTIVITY PATTERNS ────────────────────────────────────
+
+const COMPUTER_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher introduces **${t}** by ${pick(rng, ['tracing through a worked example on the board or projector, narrating each step and asking learners to predict the next', 'showing a short program or algorithm and asking: *What does this do? What would happen if we changed line 3? Where might it fail?*', 'presenting a problem and walking through the process of decomposition — breaking it into sub-tasks before writing a single line'])}. 
+
+${res.digital ? 'Learners work individually or in pairs on their devices — writing, tracing, or modifying code/pseudocode related to **' + t + '**.' : 'Learners work in pairs on paper-based pseudocode or flowcharts, developing the logic of **' + t + '** before any digital implementation.'}
+
+The task follows four stages: (1) understand the problem, (2) plan the solution, (3) implement and test, (4) evaluate and improve. Each stage is time-boxed and displayed. ${scaffold ? '\n\n**Scaffold support:** A partially completed template with comments is provided, reducing the blank-page barrier.' : stretch ? '\n\n**Stretch task:** Learners who complete the core task are challenged to optimise their solution, add error handling, or explain the time complexity of their approach.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.computer)}
+
+The teacher targets common logical errors during circulation and uses a live trace on the board to address class-wide misconceptions at a key intervention moment.`,
+];
+
+// ─── GENERAL / CROSS-CURRICULAR ACTIVITY PATTERNS ──────────────────────────
+
+const GENERAL_ACTIVITIES = [
+  ({ t, gs, gn, res, scaffold, stretch, mixed, formation, note, tbRef, rng }) => `**Core Activity: ${t}${tbRef}**
+
+The teacher introduces the key content of **${t}** through ${pick(rng, ['a structured teacher presentation with regular comprehension checks', 'a combination of direct instruction and guided questioning', 'a collaborative concept map built on the board with class input', 'a structured discussion with factual anchors supplied throughout'])}. At two points, the teacher pauses and asks learners to turn and explain what they've heard to a partner — this keeps cognitive load manageable and surfaces confusion early.
+
+Learners work in groups of ${gs} (${gn} groups). ${formation}. The task requires learners to engage with the material through ${pick(rng, ['a structured discussion followed by a written response', 'a problem-solving or categorisation task with increasing difficulty', 'a collaborative summary using chartpaper or individual notebooks', 'a peer-teaching rotation where each group becomes expert in one aspect of the topic'])}. ${scaffold ? '\n\n**Scaffold support:** Key vocabulary and sentence frames are displayed prominently. The teacher provides additional verbal scaffolding during circulation.' : stretch ? '\n\n**Stretch task:** An open-ended challenge question requires learners to apply the concept to a novel scenario and justify their reasoning.' : mixed ? '\n\n**Mixed-ability note:** The teacher has positioned stronger learners within groups and briefed them on the peer-support role before the task begins.' : ''}
+
+${note}
+
+${pick(rng, QUESTIONING_PROBES.general)}
+
+The teacher circulates purposefully — spending less time with confident groups and targeting support where it is most needed. Key misconceptions noted during the activity are addressed before the summary begins.`,
+];
+
+// ─── ACTIVITY DISPATCHER ───────────────────────────────────────────────────
+
+function dispatchActivity(subType, params, rng) {
+  const banks = {
+    maths:     MATHS_ACTIVITIES,
+    physics:   PHYSICS_ACTIVITIES,
+    chemistry: CHEMISTRY_ACTIVITIES,
+    biology:   BIOLOGY_ACTIVITIES,
+    science:   BIOLOGY_ACTIVITIES, // closest match
+    english:   ENGLISH_ACTIVITIES,
+    nepali:    ENGLISH_ACTIVITIES,
+    social:    SOCIAL_ACTIVITIES,
+    computer:  COMPUTER_ACTIVITIES,
+    general:   GENERAL_ACTIVITIES,
+  };
+  const bank = banks[subType] || GENERAL_ACTIVITIES;
+  return pick(rng, bank)(params);
+}
+
+// ─── DOUBLE-LESSON SECOND PART ─────────────────────────────────────────────
+
+const SECOND_PART_TEMPLATES = [
+  ({ t, cambridge, subType, rng }) => `**Second Part: Consolidation and Peer Teaching**
+
+After a short transition, the class reconvenes. Each group produces a brief "expert summary" — one key idea from the first activity, explained in their own words with an example. Groups share with an adjacent group in a peer-teaching rotation.
+
+The teacher uses this as a formative assessment window, listening carefully for gaps and misconceptions before addressing them whole-class.${cambridge ? '\n\nA full BLE-style structured question is attempted individually in the final fifteen minutes. The teacher displays the mark scheme and guides learners through self-assessment.' : ''}`,
+
+  ({ t, cambridge, subType, rng }) => `**Second Part: Application and Problem-Solving**
+
+With the core concept established, the class moves to an application phase. The teacher poses two or three increasingly complex tasks that require learners to transfer their understanding to new contexts or more demanding problems.
+
+${cambridge ? 'The teacher models one past-paper style question, annotating the mark-scheme language, before learners attempt a second question independently.' : 'Learners work individually for a focused 10-minute consolidation period before comparing approaches with a partner.'}
+
+The teacher monitors pace and decides whether to extend independent work or bring the class back together for a mid-session discussion.`,
+
+  ({ t, cambridge, subType, rng }) => `**Second Part: Investigation or Extended Task**
+
+The second half of the lesson gives learners the opportunity to engage with **${t}** more independently. ${subType === 'maths' ? 'Learners tackle an open investigation where multiple methods are valid — the focus is on the quality of mathematical reasoning, not just the answer.' : subType === 'science' || subType === 'biology' || subType === 'physics' || subType === 'chemistry' ? 'A follow-up practical or data-analysis task requires learners to draw conclusions and write up findings using the correct scientific conventions.' : 'Learners engage with a source, case study, or extended problem requiring sustained reading, thinking, and written response.'}
+
+The teacher steps back from direct instruction and circulates in a coaching role — responding to questions with questions rather than answers, and noting observations for the reflection and next-lesson planning.`,
+];
+
+// ═══════════════════════════════════════════════════════
+//  11. STATION ROTATION VARIANT (special engagement mode)
+// ═══════════════════════════════════════════════════════
+
+function generateStationActivity(data, subType, t, res, rng) {
+  const numStations = data.duration >= 80 ? 4 : 3;
+  const stationTime = Math.floor((parseInt(data.duration) * 0.55) / numStations);
+  const stationTypes = {
+    maths:    ['Worked examples station (silent, individual)', 'Peer-teaching station (explain to partner)', 'Problem-solving station (novel application)', 'Whiteboard station (show-your-thinking)'],
+    science:  ['Observation station (specimen/image analysis)', 'Question-card station (discussion cards)', 'Diagram station (labelling/annotating)', 'Written response station (structured question)'],
+    english:  ['Close-reading station (annotation)', 'Writing station (paragraph response)', 'Discussion station (speaking cards)', 'Research station (reference materials)'],
+    general:  ['Knowledge station (reading and note-taking)', 'Application station (problem or case study)', 'Creative station (representation task)', 'Reflection station (written response)'],
+  };
+  const stations = pickN(rng, stationTypes[subType] || stationTypes.general, numStations);
+  return `**Core Activity: Station Rotation — ${t}**
+
+The class operates a ${numStations}-station rotation. Each station runs for approximately ${stationTime} minutes. The teacher signals transitions using the class countdown.
+
+${stations.map((s, i) => `**Station ${i+1}:** ${s}`).join('\n')}
+
+The teacher is stationed at the most cognitively demanding station, providing targeted support. Other stations are designed to be fully self-directed. Groups rotate on the teacher's signal.
+
+At the end of the rotation, learners return to their seats and write a two-sentence summary of the most important idea they encountered across all stations.`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  12. MAIN ACTIVITIES ORCHESTRATOR
+// ═══════════════════════════════════════════════════════
+
+function generateMainActivities(data, rng, engagementPattern) {
+  const { subject, topic, grade, ability, classSize, textbook, sen, curriculum, duration } = data;
+  const subType = classifySubject(subject, topic);
+  const level = classifyGrade(grade||'');
+  const cs = parseClassSize(classSize||'30');
+  const res = getResources();
+  const cambridge = hasCambridge(curriculum);
+  const minutes = parseDuration(duration);
+  const scaffold = /scaffold|below/i.test(ability||'');
+  const stretch = /above|stretch/i.test(ability||'');
+  const mixed = /mixed|wide/i.test(ability||'');
+  const t = topic || subject;
+  const tbRef = textbook ? ` (${textbook})` : '';
+  const formation = pick(rng, GROUP_FORMATIONS);
+  const note = pick(rng, NOTE_PROMPTS[subType] || NOTE_PROMPTS.general);
+
+  const params = { t, gs: cs.size, gn: cs.groups, res, scaffold, stretch, mixed, formation, note, tbRef, cambridge, rng, subType };
+
+  // Station rotation override
+  if (engagementPattern === 'station') {
+    return generateStationActivity(data, subType, t, res, rng);
+  }
+
+  const single = dispatchActivity(subType, params, rng);
+
+  if (minutes >= 75) {
+    const secondPart = pick(rng, SECOND_PART_TEMPLATES)({ t, cambridge, subType, rng });
+    return single + '\n\n---\n\n' + secondPart;
+  }
+  return single;
+}
+
+// ═══════════════════════════════════════════════════════
+//  13. FORMATIVE ASSESSMENT CHECKPOINT GENERATOR
+// ═══════════════════════════════════════════════════════
+
+const CHECKPOINT_STRATEGIES = [
+  (t, subType) => `**Checkpoint: Comprehension scan** — The teacher pauses the class and poses one targeted question about **${t}**. Learners respond simultaneously (mini-whiteboard, thumbs signal, or written slip) so the teacher can identify the proportion who need further support before proceeding.`,
+  (t, subType) => `**Checkpoint: Turn-and-teach** — The teacher stops the activity and each learner explains the concept to their partner in 30 seconds. The teacher listens to three or four pairs and notes confidence levels. Low-confidence pairs are flagged for additional teacher time in the next segment.`,
+  (t, subType) => `**Checkpoint: Hot-cold survey** — The teacher poses a diagnostic question and learners signal their confidence: "hot" (confident), "warm" (mostly there), "cold" (still unsure). The teacher adjusts the next instruction based on the class distribution — addressing the most common point of confusion.`,
+  (t, subType) => `**Checkpoint: Targeted questioning** — The teacher selects four learners who are not yet showing full understanding (based on circulation) and poses the same question to each one in sequence. Their responses reveal the nature of the misconception and guide the teacher's correction strategy.`,
+  (t, subType) => `**Checkpoint: One-word check** — The teacher asks learners to write one word that completes the sentence *"The key idea of [${t}] is ___."* The teacher scans responses and selects three to four diverse answers to discuss with the class.`,
+];
+
+function generateFormativeChecks(topic, subType, numCheckpoints, rng) {
+  const n = numCheckpoints === 'continuous' ? 3 : (parseInt(numCheckpoints) || 2);
+  const selected = pickN(rng, CHECKPOINT_STRATEGIES, n);
+  return selected.map(fn => fn(topic, subType));
+}
+
+// ═══════════════════════════════════════════════════════
+//  14. DIFFERENTIATION MATRIX GENERATOR
+// ═══════════════════════════════════════════════════════
+
+const DIFF_SCAFFOLD_BANK = {
+  maths:    ['Provide annotated worked examples students can use as a reference while solving', 'Break multi-step problems into smaller, labelled sub-tasks on a printed scaffold', 'Offer a partially completed solution where the student fills in specific steps', 'Display a vocabulary bank of operational terms (e.g. "simplify," "factorise") with brief definitions'],
+  science:  ['Supply a word bank of key scientific terms for written responses', 'Provide a pre-drawn diagram where students add labels (rather than drawing from scratch)', 'Offer a structured observation table so students know what to record', 'Pair students with a "scaffold partner" who models the thinking process aloud'],
+  english:  ['Provide a writing frame (P–E–E / PEEL / TEEL) for analytical paragraphs', 'Supply a list of analytical sentence starters ("The writer uses… which suggests…")', 'Provide the text with key quotations already highlighted; students identify the technique', 'Use a graphic organiser to structure arguments before students write in paragraphs'],
+  general:  ['Chunking: present information in smaller, numbered steps rather than as a block', 'Visual anchors: keep key vocabulary and the lesson objective visible throughout', 'Provide a thinking frame or sentence stem to help students enter the task', 'Allow additional processing time and reduce the quantity (not quality) of the task'],
+};
+
+const DIFF_STRETCH_BANK = {
+  maths:    ['Require justification or proof, not just computation — "why does this always work?"', 'Introduce an open investigation with multiple valid approaches and no single answer', 'Challenge students to construct their own example that satisfies a set of constraints', 'Connect to a higher-level concept: ask how this topic relates to what they\'ll study next year'],
+  science:  ['Request a hypothesis and experimental design, not just a result', 'Ask students to evaluate the method and suggest a modification to improve reliability', 'Connect the concept to a current scientific issue or real-world application beyond the textbook', 'Introduce an "unseen data set" that applies the same principles to an unfamiliar context'],
+  english:  ['Require a comparative analysis across two texts rather than one', 'Ask students to write from a perspective other than the one modelled', 'Challenge students to evaluate the quality of their own argument using the mark-scheme criteria', 'Introduce a counter-argument students must acknowledge and refute in their writing'],
+  general:  ['Ask "what if" — change one variable in the scenario and require a reasoned prediction', 'Require students to connect the topic to another subject area or real-world example unprompted', 'Challenge students to design their own question at the same difficulty level and answer it', 'Ask students to reflect on their own learning process: what strategy helped them most, and why?'],
+};
+
+const DIFF_CORE_BANK = {
+  maths:    ['Core task: solve the given set of problems showing all working, building from procedural to applied', 'Core task: complete the structured worksheet and check each answer using an inverse or estimation strategy', 'Core task: work through the main investigation and record results and conclusions clearly'],
+  science:  ['Core task: complete the practical or analysis task and answer the comprehension questions provided', 'Core task: use the guided structure to complete the diagram, answer questions, and write a conclusion', 'Core task: work through the investigation at your own pace, recording observations and inferences'],
+  general:  ['Core task: engage fully with the group activity and contribute to the written or presented output', 'Core task: complete the tasks as set, aiming to reach the third question / level before the timer runs out', 'Core task: read, discuss, and respond to the materials provided, using the vocabulary displayed on the board'],
+};
+
+function generateDifferentiation(subType, rng) {
+  return {
+    scaffold: pick(rng, DIFF_SCAFFOLD_BANK[subType] || DIFF_SCAFFOLD_BANK.general),
+    core:     pick(rng, DIFF_CORE_BANK[subType]    || DIFF_CORE_BANK.general),
+    stretch:  pick(rng, DIFF_STRETCH_BANK[subType] || DIFF_STRETCH_BANK.general),
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  15. SUMMARY / CLOSURE ENGINE
+// ═══════════════════════════════════════════════════════
+
+const EXIT_STRATEGIES = {
+  exitTicket: {
+    maths:    ['Learners solve one final problem individually — no notes, no group support. The teacher collects responses as they leave. Correct answers confirm the objective is met; errors guide the next lesson\'s opening.', 'Each learner completes one targeted question on a small piece of paper and hands it in as the exit ticket. The teacher groups responses into "secure," "developing," and "needs revisiting" before the next session.'],
+    science:  ['Learners write one sentence answering the lesson\'s central question — in their own words and without prompting. The teacher reads a sample aloud and the class evaluates it together.', 'Each learner writes one thing they\'re now confident about and one thing they still want to clarify. These are collected and the teacher addresses the most common uncertainty in the next lesson\'s opening.'],
+    english:  ['Learners write one well-crafted analytical sentence using a technique from today\'s lesson. The teacher reads three aloud and invites peer evaluation against the success criteria.', 'A "what changed?" reflection: learners complete *Before this lesson I thought… now I think…* in two full sentences.'],
+    general:  ['Learners write the most important idea from today\'s lesson — one sentence — before leaving. The teacher groups responses to identify whether the learning objective was met.', 'A one-question exit check: the teacher poses a single diagnostic question. Learners respond on a small slip of paper. The distribution of answers shapes the next lesson.'],
+  },
+  threeTwoOne: {
+    general:  ['**3–2–1 Reflection:** Learners write three things they learned, two things they found interesting or surprising, and one question they still have. Volunteers share across each category. The "one question" column is used to open the next lesson.'],
+  },
+  peerQuiz: {
+    general:  ['**Partner quiz close:** Learners take turns asking and answering one question each about today\'s topic — without notes. The teacher listens in and notes which pairs are confident and which need follow-up. The most common "stumper" question is posed to the whole class.'],
+  },
+  whiteboard: {
+    general:  ['**Show-me boards:** The teacher poses three rapid-fire questions. Learners hold up their responses simultaneously. The teacher scans for errors and addresses the most common one before dismissal.'],
+  },
+  thinkPairShare: {
+    general:  ['**Think–pair–share close:** The teacher poses a summary question. Learners think silently for one minute, discuss with a partner for one minute, then two or three pairs share with the class. The teacher synthesises the responses into the lesson\'s closing statement.'],
+  },
+  pollQuestions: {
+    general:  ['**Oral poll:** The teacher poses three quick-fire questions. Learners signal with hands or call out answers together. The teacher notes confidence levels and affirms or corrects before dismissal.'],
+  },
+  auto: { general: [] },
+};
+
+function resolveExit(exitStyle, subType, topic, rng) {
+  const t = topic || 'this topic';
+  const style = exitStyle === 'auto'
+    ? pick(rng, ['exitTicket','threeTwoOne','peerQuiz','whiteboard','thinkPairShare'])
+    : exitStyle;
+  const bank = EXIT_STRATEGIES[style] || EXIT_STRATEGIES.exitTicket;
+  const pool = bank[subType] || bank.general || EXIT_STRATEGIES.exitTicket.general;
+  return pick(rng, pool) || `Learners respond to a single question about **${t}** before leaving, providing the teacher with formative evidence of lesson impact.`;
+}
+
+const SUMMARY_RECAPS = [
+  (t, rng) => `The teacher brings the class back together using the countdown. Key ideas from **${t}** are revisited through ${pick(rng, ['three targeted teacher-led questions', 'a rapid whole-class recall sequence', 'a brief teacher narration followed by learner additions'])}. Incorrect or partial responses are built upon rather than bypassed — the teacher uses *What makes you say that?* and *Can anyone extend that?* to deepen the thinking.`,
+  (t, rng) => `For the summary, the teacher invites two or three learners to explain the core concept of **${t}** in their own words — *as if explaining to a younger student*. Peers listen and add amendments. The teacher offers a final precise formulation before moving to the exit activity.`,
+  (t, rng) => `The class comes back together. The teacher narrates a brief "story of the lesson" — what was introduced, what was explored, and what was discovered — before handing over to learners to fill in the final moments with their own recap.`,
+  (t, rng) => `A structured whole-class review: the teacher poses the two lesson objectives as questions. *Did we meet them? How do we know?* Learners contribute evidence from their work during the main activity. The teacher affirms, corrects, or extends.`,
+];
+
+function generateSummary(data, rng, exitStyle) {
+  const { topic, subject, assessment, curriculum } = data;
+  const subType = classifySubject(subject, topic);
+  const cambridge = hasCambridge(curriculum);
+  const t = topic || subject || 'this topic';
+  const customAssessment = assessment && assessment.trim().length > 5;
+
+  const recap = pick(rng, SUMMARY_RECAPS)(t, rng);
+  const exit = resolveExit(exitStyle, subType, t, rng);
+  const customLine = customAssessment ? `\n\n*Assessment note:* ${assessment.trim().charAt(0).toUpperCase() + assessment.trim().slice(1)}.` : '';
+  const camLine = cambridge ? '\n\n**Cambridge practice:** If time permits, the teacher models the mark-scheme language expected for this topic in a BLE or IGCSE-style structured response.' : '';
+
+  return `${recap}\n\n${exit}${customLine}${camLine}`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  16. SEN / INCLUSION GENERATOR
+// ═══════════════════════════════════════════════════════
+
+const SEN_GENERIC_MEASURES = [
+  'Key vocabulary displayed prominently throughout the lesson',
+  'Task instructions given in both spoken and written form',
+  'Chunked task design — shorter phases with clear transitions',
+  'Partner or group structures reduce cognitive load for processing difficulties',
+  'Extended processing time offered for individual responses',
+  'Teacher positions to scan room and check in with learners who may not self-advocate',
+];
+
+function generateInclusionNotes(sen, rng) {
+  if (!sen || sen.trim().length < 5) {
+    return 'General inclusion measures are in place throughout: task chunking, visual anchors, a low-stakes classroom culture, and targeted teacher circulation.';
+  }
+
+  const measures = pickN(rng, SEN_GENERIC_MEASURES, 3);
+  return `*Based on noted SEN/inclusion context:* ${sen.trim()}\n\nSpecific measures: ${measures.join('; ')}. The teacher monitors identified learners during circulation and is prepared to provide adapted materials on request.`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  17. RESOURCE MANIFEST
+// ═══════════════════════════════════════════════════════
+
+function buildResourceManifest(res, textbook, subType, duration) {
+  const items = [];
+  if (res.projector) items.push('Projector / display screen');
+  if (res.whiteboard) items.push('Whiteboard and markers');
+  if (res.chartpaper) items.push('Chart paper (one per group)');
+  if (res.markers) items.push('Coloured markers');
+  if (res.lab) items.push('Lab equipment / materials (as per practical task)');
+  if (res.digital) items.push('Student devices (laptops / tablets)');
+  if (res.cards) items.push('Card sets for sorting/matching activity');
+  if (res.mini_wb) items.push('Mini-whiteboards and pens');
+  if (res.sticky) items.push('Sticky notes');
+  if (res.manipulatives) items.push('Physical manipulatives');
+  if (textbook) items.push(`Class textbook: ${textbook}`);
+  items.push('Student notebooks and pens');
+  items.push('Class register / attendance record');
+  return items;
+}
+
+// ═══════════════════════════════════════════════════════
+//  18. EVIDENCE TRAIL (Assessment for learning journey)
+// ═══════════════════════════════════════════════════════
+
+function buildEvidenceTrail(exitStyle, subType, rng) {
+  const nodes = [
+    { icon: '🌡️', label: 'Entry temp check' },
+    { icon: '👥', label: 'Group task observation' },
+    { icon: '✋', label: 'Checkpoint probe' },
+    { icon: '📝', label: exitStyle === 'exitTicket' ? 'Exit ticket' : exitStyle === 'threeTwoOne' ? '3-2-1 reflection' : exitStyle === 'peerQuiz' ? 'Peer quiz' : 'Exit activity' },
+    { icon: '🔄', label: 'Informs next lesson' },
+  ];
+  return nodes;
+}
+
+// ═══════════════════════════════════════════════════════
+//  19. REFLECTION QUESTION BANK (varied, targeted)
+// ═══════════════════════════════════════════════════════
+
+const REFLECTION_QUESTIONS_BANK = {
+  general: [
+    'Were the learning objectives realistic and met by the majority of the class?',
+    'What did the learners learn? What evidence do I have for this?',
+    'What was the quality of the learning atmosphere today?',
+    'What changes did I make from my plan, and were they effective?',
+    'What two things really worked — consider both teaching and learning?',
+    'What two things would have improved the lesson?',
+    'Which learners are still not understanding, and what is my next step with them?',
+    'Did the pacing allow for both depth and breadth within the time available?',
+    'How well did my questioning deepen thinking? Did I fall back on closed questions too early?',
+    'What did I notice about individual learners that I should record or act on?',
+  ],
+  cambridge: [
+    'Did the lesson connect explicitly to the Cambridge specification or BLE requirements?',
+    'Are learners developing the command word vocabulary they need for assessed responses?',
+    'Which learners are on track for the expected grade level, and which need targeted intervention?',
+  ],
+};
+
+function pickReflectionQuestions(curriculum, rng) {
+  const base = pickN(rng, REFLECTION_QUESTIONS_BANK.general, 7);
+  if (hasCambridge(curriculum)) {
+    base.push(...pickN(rng, REFLECTION_QUESTIONS_BANK.cambridge, 2));
+  }
+  return base;
+}
+
+// ═══════════════════════════════════════════════════════
+//  20. SUCCESS CRITERIA GENERATOR
+// ═══════════════════════════════════════════════════════
+
+function generateSuccessCriteria(objectives, criteriaStyle, subType, rng) {
+  if (criteriaStyle === 'none') return null;
+
+  if (criteriaStyle === 'walts') {
+    return {
+      type: 'walts',
+      walt: objectives[0] ? objectives[0].replace(/^by the end of this lesson, learners will be able to /i, '').replace(/^learners will be able to /i, '').replace(/^learners will /i, '') : 'engage with today\'s topic',
+      wilf: objectives[1] ? objectives[1].replace(/^learners will /i, '') : 'apply understanding to a new context',
+    };
+  }
+
+  if (criteriaStyle === 'steps' || criteriaStyle === 'auto') {
+    const steps = {
+      maths:    ['I can recall and state the rule or procedure', 'I can apply it to a straightforward example with working shown', 'I can use it to solve a multi-step or applied problem', 'I can explain why the method works and identify where it might go wrong'],
+      science:  ['I can recall and state the key scientific concept', 'I can explain it in my own words using correct vocabulary', 'I can apply it to explain an observation or answer a data question', 'I can evaluate evidence and construct a scientific argument'],
+      english:  ['I can identify the relevant language technique in the text', 'I can explain its effect using subject-specific language', 'I can link it to the writer\'s purpose or the text\'s context', 'I can apply the same technique in my own original writing'],
+      general:  ['I can state the core idea in my own words', 'I can give at least one example that illustrates it', 'I can apply it to a new or unfamiliar situation', 'I can connect it to what I already know and explain why it matters'],
+    };
+    return { type: 'steps', items: steps[subType] || steps.general };
+  }
+
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════
+//  21. MAIN ORCHESTRATOR
+// ═══════════════════════════════════════════════════════
+
+function gatherFormData() {
+  return {
+    teacher:      document.getElementById('teacher').value.trim() || 'Rajat Thapa',
+    grade:        document.getElementById('grade').value.trim() || 'VIII',
+    subject:      document.getElementById('subject').value.trim() || 'Science',
+    duration:     document.getElementById('duration').value || '45',
+    topic:        document.getElementById('topic').value.trim(),
+    lessonNum:    document.getElementById('lessonNum').value,
+    outcomes:     document.getElementById('outcomes').value.trim(),
+    classSize:    document.getElementById('classSize').value || '30',
+    ability:      document.getElementById('ability').value,
+    sen:          document.getElementById('sen').value.trim(),
+    curriculum:   document.getElementById('curriculum').value,
+    textbook:     document.getElementById('textbook').value.trim(),
+    actual:       document.getElementById('actual').value.trim(),
+    slides:       document.getElementById('slides').value.trim(),
+    assessment:   document.getElementById('assessmentNotes').value.trim(),
+    schoolName:   document.getElementById('schoolName').value.trim(),
+    dateField:    document.getElementById('dateField').value,
+    variantSeed:  document.getElementById('variantSeed').value.trim(),
+  };
+}
+
+function generatePlanContent(data) {
+  // Build deterministic seed
+  const seedStr = data.variantSeed
+    ? data.variantSeed
+    : (data.teacher + data.grade + data.subject + data.topic + data.outcomes + data.ability + data.classSize + data.curriculum + data.duration + data.actual + data.lessonNum).toLowerCase();
+  const seed = hashStr(seedStr);
+  const rng = makePRNG(seed);
+
+  // Burn a few values for cross-section diversity
+  rng(); rng(); rng(); rng();
+
+  // Resolve pedagogy preferences
+  const strategyPref   = getPillValue('strategyPills');
+  const bloomPref      = getPillValue('bloomPills');
+  const engagePref     = getPillValue('engagePills');
+  const warmupPref     = getPillValue('warmupPills');
+  const exitPref       = getPillValue('exitPills');
+  const checkpointPref = getPillValue('checkpointPills');
+  const criteriaPref   = getPillValue('criteriaPills');
+  const opts           = getOutputSections();
+  const res            = getResources();
+
+  const subType  = classifySubject(data.subject, data.topic);
+  const level    = classifyGrade(data.grade||'');
+  const minutes  = parseDuration(data.duration);
+  const timings  = calculateTimings(minutes);
+  const bloomLvl = resolveBloomsLevel(bloomPref, level);
+
+  // Determine engagement pattern
+  const engagementPattern = engagePref === 'mixed' || engagePref === 'auto'
+    ? pick(rng, ['groups','pairs','whole','groups','groups']) // bias to groups
+    : engagePref;
+
+  // Generate all sections
+  const objectives = generateObjectives(data, rng, bloomLvl);
+  const standards  = getStandards(data.curriculum, subType);
+  const intro      = generateIntroduction(data, rng, warmupPref, opts);
+  const mainActs   = generateMainActivities(data, rng, engagementPattern);
+  const summary    = generateSummary(data, rng, exitPref);
+  const diff       = generateDifferentiation(subType, rng);
+  const formative  = generateFormativeChecks(data.topic, subType, checkpointPref, rng);
+  const senNotes   = generateInclusionNotes(data.sen, rng);
+  const resources  = buildResourceManifest(res, data.textbook, subType, minutes);
+  const evidence   = buildEvidenceTrail(exitPref, subType, rng);
+  const reflection = pickReflectionQuestions(data.curriculum, rng);
+  const criteria   = generateSuccessCriteria(objectives, criteriaPref, subType, rng);
+
+  return { objectives, standards, intro, mainActs, summary, diff, formative, senNotes, resources, evidence, reflection, criteria, bloomLvl, subType, timings, opts, engagementPattern };
+}
+
+// ═══════════════════════════════════════════════════════
+//  22. RENDER ENGINE
+// ═══════════════════════════════════════════════════════
+
+function renderPlan(plan, data) {
+  const { objectives, standards, intro, mainActs, summary, diff, formative, senNotes, resources, evidence, reflection, criteria, bloomLvl, subType, timings, opts } = plan;
+  const res = getResources();
+  const minutes = parseDuration(data.duration);
+  const dateStr = data.dateField ? new Date(data.dateField).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : '';
+
+  const card = document.getElementById('outputCard');
+  card.innerHTML = '';
+
+  const out = document.createElement('div');
+  out.className = 'plan-output';
+
+  let html = '';
+
+  // ── Header meta
+  html += `<span class="plan-curriculum-tag">📚 ${esc(data.curriculum)}</span>`;
+
+  // ── Header grid
+  html += `<div class="plan-meta-grid">
+    <div class="plan-meta-cell"><span class="lbl">Class</span><strong>${esc(data.grade)}</strong></div>
+    <div class="plan-meta-cell"><span class="lbl">Teacher</span><strong>${esc(data.teacher)}</strong></div>
+    <div class="plan-meta-cell"><span class="lbl">Unit / Topic</span><strong>${esc(data.topic)}</strong></div>
+    <div class="plan-meta-cell"><span class="lbl">Time</span><strong>${esc(data.duration)} min</strong>${dateStr ? ` &nbsp;<span style="color:var(--ink-ghost);font-size:0.8rem;">· ${esc(dateStr)}</span>` : ''}</div>
+  </div>`;
+
+  // ── Lesson context (school, number)
+  if (data.schoolName || data.lessonNum) {
+    html += `<div class="plan-meta-grid" style="border-top:none">`;
+    if (data.schoolName) html += `<div class="plan-meta-cell"><span class="lbl">School</span><strong>${esc(data.schoolName)}</strong></div>`;
+    if (data.lessonNum) {
+      const lessonNumLabels = { intro:'Introducing the topic', mid:'Developing understanding', consolidate:'Consolidating', apply:'Applying to new contexts', review:'Reviewing / assessing' };
+      html += `<div class="plan-meta-cell"><span class="lbl">Lesson stage</span><strong>${esc(lessonNumLabels[data.lessonNum] || data.lessonNum)}</strong></div>`;
+    }
+    if (!data.schoolName) html += `<div class="plan-meta-cell"></div>`;
+    if (!data.lessonNum) html += `<div class="plan-meta-cell"></div>`;
+    html += `</div>`;
+  }
+
+  // ── Objectives
+  html += `<div class="plan-objectives-box"><span class="title">Learning Objectives</span><ul>`;
+  objectives.forEach((obj, i) => {
+    const lvl = bloomLvl[i % bloomLvl.length];
+    const bloomMeta = BLOOMS[lvl];
+    const bloomTag = opts.bloomsObjectives && bloomMeta
+      ? `<span class="plan-bloom-tag ${bloomMeta.color}">${bloomMeta.label}</span>`
+      : '';
+    html += `<li>${esc(plainText(obj))}${bloomTag}</li>`;
+  });
+  html += `</ul></div>`;
+
+  // ── Success Criteria
+  if (criteria && opts.bloomsObjectives) {
+    html += `<div class="plan-objectives-box" style="border-top:none;background:var(--paper-warm)">`;
+    if (criteria.type === 'walts') {
+      html += `<span class="title" style="font-size:0.85rem;">Success Criteria</span>
+        <p style="margin:0 0 4px;font-size:0.88rem;"><strong>WALT:</strong> ${esc(criteria.walt)}</p>
+        <p style="margin:0;font-size:0.88rem;"><strong>WILF:</strong> ${esc(criteria.wilf)}</p>`;
+    } else if (criteria.type === 'steps') {
+      html += `<span class="title" style="font-size:0.85rem;">Steps to Success</span><ul>`;
+      criteria.items.forEach(step => { html += `<li style="font-size:0.86rem;margin-bottom:3px;">${esc(step)}</li>`; });
+      html += `</ul>`;
+    }
+    html += `</div>`;
+  }
+
+  // ── Curriculum alignment
+  if (opts.curriculumStandards) {
+    html += `<div class="plan-standards-box"><span class="title">Curriculum Alignment — ${esc(data.curriculum)}</span>`;
+    standards.slice(0, 3).forEach(s => { html += `<div style="margin-bottom:3px;">· ${esc(s)}</div>`; });
+    html += `</div>`;
+  }
+
+  // ── Prior knowledge
+  if (opts.priorKnowledge && intro.priorBlock) {
+    html += `<div class="prior-banner">🔗 <strong>Prior knowledge connection:</strong> ${esc(intro.priorBlock)}</div>`;
+  }
+
+  // ── Slides
+  if (data.slides) {
+    html += `<p class="slides-link">📊 Slides: <a href="${esc(data.slides)}" target="_blank">${esc(data.subject)} — ${esc(data.topic)}</a></p>`;
+  }
+
+  // ── Resources
+  if (opts.resourceManifest) {
+    html += `<div class="plan-section-head">Resources <span class="time-badge">Before class</span></div>`;
+    html += `<div class="resource-manifest">${resources.map(r => `· ${esc(r)}`).join('  ')}</div>`;
+  }
+
+  // ── Sequence of Activities
+  html += `<div class="plan-section-head">Sequence of Activities</div>`;
+  html += `<table class="seq-table"><thead><tr>
+    <th>Phase</th>
+    ${opts.timing ? '<th>Time</th>' : ''}
+    <th>Planned Activities</th>
+  </tr></thead><tbody>`;
+
+  // Introduction row
+  const introContent = buildIntroContent(intro, opts, data.teacher);
+  html += `<tr>
+    <td class="phase-name">Introduction</td>
+    ${opts.timing ? `<td class="timing">~${timings.intro} min</td>` : ''}
+    <td>${introContent}</td>
+  </tr>`;
+
+  // Formative checkpoint 1
+  if (opts.formativeChecks && formative.length > 0) {
+    html += `<tr style="background:rgba(30,122,122,0.03)">
+      <td class="phase-name" style="color:var(--teal);font-size:0.83rem;">Check 1</td>
+      ${opts.timing ? '<td class="timing" style="color:var(--teal);">mid-intro</td>' : ''}
+      <td style="font-size:0.86rem;color:var(--teal)">${formatRich(formative[0])}</td>
+    </tr>`;
+  }
+
+  // Main activities row
+  const strategyLabel = deriveStrategyLabel(plan.engagementPattern, opts);
+  html += `<tr>
+    <td class="phase-name">Main Activities</td>
+    ${opts.timing ? `<td class="timing">~${timings.main} min</td>` : ''}
+    <td>${strategyLabel}${formatRich(mainActs)}</td>
+  </tr>`;
+
+  // Formative checkpoint 2
+  if (opts.formativeChecks && formative.length > 1) {
+    html += `<tr style="background:rgba(30,122,122,0.03)">
+      <td class="phase-name" style="color:var(--teal);font-size:0.83rem;">Check 2</td>
+      ${opts.timing ? '<td class="timing" style="color:var(--teal);">mid-task</td>' : ''}
+      <td style="font-size:0.86rem;color:var(--teal)">${formatRich(formative[1])}</td>
+    </tr>`;
+  }
+
+  // Formative checkpoint 3 (if exists)
+  if (opts.formativeChecks && formative.length > 2) {
+    html += `<tr style="background:rgba(30,122,122,0.03)">
+      <td class="phase-name" style="color:var(--teal);font-size:0.83rem;">Check 3</td>
+      ${opts.timing ? '<td class="timing" style="color:var(--teal);">pre-summary</td>' : ''}
+      <td style="font-size:0.86rem;color:var(--teal)">${formatRich(formative[2])}</td>
+    </tr>`;
+  }
+
+  // Summary row
+  html += `<tr>
+    <td class="phase-name">Summary &amp; Closure</td>
+    ${opts.timing ? `<td class="timing">~${timings.summary} min</td>` : ''}
+    <td>${formatRich(summary)}</td>
+  </tr>`;
+
+  html += `</tbody></table>`;
+
+  // ── Differentiation panel
+  if (opts.differentiation) {
+    html += `<div class="plan-section-head">Differentiation <span class="time-badge">Throughout</span></div>`;
+    html += `<div class="diff-grid">
+      <div class="diff-card diff-scaffold"><div class="dc-head">▲ Support / Scaffold</div>${esc(diff.scaffold)}</div>
+      <div class="diff-card diff-core"><div class="dc-head">● Core Task</div>${esc(diff.core)}</div>
+      <div class="diff-card diff-stretch"><div class="dc-head">★ Stretch / Extension</div>${esc(diff.stretch)}</div>
+    </div>`;
+  }
+
+  // ── Inclusion / SEN
+  if (opts.inclusionBox && (data.sen || true)) {
+    html += `<div class="plan-section-head">Inclusion &amp; Access</div>`;
+    html += `<div class="inclusion-box"><span class="title">SEN / Inclusion measures</span>${formatRich(senNotes)}</div>`;
+  }
+
+  // ── Assessment evidence trail
+  if (opts.evidenceTrail) {
+    html += `<div class="plan-section-head">Assessment Evidence Trail</div>`;
+    html += `<div class="evidence-trail">`;
+    evidence.forEach(node => {
+      html += `<div class="evidence-node"><div class="ev-icon">${node.icon}</div><div class="ev-label">${esc(node.label)}</div></div>`;
+    });
+    html += `<div class="evidence-node" style="flex:1;min-width:100px;text-align:left;border:none;padding:0;align-items:flex-start;font-size:0.78rem;color:var(--ink-ghost)">Assessment data collected at each stage informs next lesson planning and targeted follow-up.</div>`;
+    html += `</div>`;
+  }
+
+  // ── Reflection
+  html += `<div class="plan-section-head">Reflection</div>`;
+  html += `<div class="reflection-card">`;
+  html += `<p>Use the space below to reflect on your lesson after teaching it. Answer the questions most relevant to today's experience.</p>`;
+  html += `<ul>${reflection.map(q => `<li>${esc(q)}</li>`).join('')}</ul>`;
+  html += `<div class="next-steps">Next Steps — based on learners' response to this lesson, what will I teach next?</div>`;
+  if (opts.writeLines) {
+    html += `<div class="write-lines">${Array(5).fill('<div class="write-line"></div>').join('')}</div>`;
+  }
+  html += `</div>`;
+
+  out.innerHTML = html;
+  card.appendChild(out);
+}
+
+function buildIntroContent(intro, opts, teacher) {
+  let html = '';
+  html += formatRich(intro.warmup);
+  html += formatRich(intro.houseRules);
+  if (opts.dearLearners) {
+    const marker = 'Dear learners';
+    const idx = intro.dearLearners.indexOf(marker);
+    if (idx !== -1) {
+      html += `<div class="dear-learners">${esc(intro.dearLearners).replace(/\n/g,'<br>')}</div>`;
+    }
+  }
+  return html;
+}
+
+function deriveStrategyLabel(pattern, opts) {
+  if (!opts.strategyLabels) return '';
+  const labels = {
+    groups: 'group-work',
+    pairs: 'paired-work',
+    whole: 'whole-class',
+    individual: 'individual',
+    station: 'station-rotation',
+  };
+  const label = labels[pattern] || 'collaborative';
+  return `<span class="strategy-chip">${label}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  23. PLAIN TEXT / EXPORT
+// ═══════════════════════════════════════════════════════
+
+let _lastPlan = null;
+let _lastData = null;
+
+function copyPlanText() {
+  if (!_lastPlan || !_lastData) return;
+  const { objectives, standards, intro, mainActs, summary, diff, reflection } = _lastPlan;
+  const data = _lastData;
+  const lines = [];
+  lines.push(`CLASS: ${data.grade}\tTeacher: ${data.teacher}`);
+  lines.push(`UNIT/TOPIC: ${data.topic}\tTIME: ${data.duration} min`);
+  if (data.dateField) lines.push(`Date: ${data.dateField}`);
+  lines.push('\nOBJECTIVES');
+  objectives.forEach(o => lines.push('- ' + plainText(o)));
+  lines.push('\nSEQUENCE OF ACTIVITIES\n');
+  lines.push('INTRODUCTION\n' + plainText(intro.warmup) + '\n' + plainText(intro.houseRules) + '\n' + plainText(intro.dearLearners));
+  lines.push('\nMAIN ACTIVITIES\n' + plainText(mainActs));
+  lines.push('\nSUMMARY\n' + plainText(summary));
+  lines.push('\nDIFFERENTIATION');
+  lines.push('Support: ' + diff.scaffold);
+  lines.push('Core: ' + diff.core);
+  lines.push('Stretch: ' + diff.stretch);
+  lines.push('\nREFLECTION');
+  reflection.forEach(q => lines.push('- ' + q));
+  lines.push('\nNext steps: ');
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    document.getElementById('statusText').textContent = 'Copied to clipboard.';
+  }).catch(() => {
+    document.getElementById('statusText').textContent = 'Could not copy — select text manually.';
+  });
+}
+
+function exportAsDoc() {
+  if (!_lastPlan || !_lastData) return;
+  const { objectives, intro, mainActs, summary, diff, reflection, bloomLvl } = _lastPlan;
+  const data = _lastData;
+
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset="utf-8"><title>${esc(data.topic)||'Lesson Plan'}</title>
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1F1F1F}h2{font-size:13pt;font-weight:bold;border-bottom:1px solid #999;padding-bottom:4px;margin-top:20pt}table{border-collapse:collapse;width:100%;margin-bottom:10pt}td,th{border:1px solid #999;padding:7px 10px;text-align:left;font-size:11pt;vertical-align:top}th{background:#F0F0F0;font-size:9pt;text-transform:uppercase;letter-spacing:1px}.diff-t{border-top:2px solid #888;padding:8px;width:32%;vertical-align:top}ul{margin:4px 0 0;padding-left:18px}</style>
+</head><body>
+<p><strong>CLASS:</strong> ${esc(data.grade)} &nbsp; <strong>Teacher:</strong> ${esc(data.teacher)} &nbsp; <strong>Date:</strong> ${esc(data.dateField)||''}</p>
+<p><strong>Topic:</strong> ${esc(data.topic)} &nbsp; <strong>Duration:</strong> ${esc(data.duration)} min &nbsp; <strong>Curriculum:</strong> ${esc(data.curriculum)}</p>
+<h2>Learning Objectives</h2><ul>${objectives.map(o=>`<li>${esc(plainText(o))}</li>`).join('')}</ul>
+<h2>Sequence of Activities</h2>
+<table><tr><th>Phase</th><th>Planned Activities</th></tr>
+<tr><td><strong>Introduction</strong></td><td>${esc(plainText(intro.warmup))}<br><br>${esc(plainText(intro.houseRules))}<br><br>${esc(plainText(intro.dearLearners))}</td></tr>
+<tr><td><strong>Main Activities</strong></td><td>${esc(plainText(mainActs))}</td></tr>
+<tr><td><strong>Summary</strong></td><td>${esc(plainText(summary))}</td></tr>
+</table>
+<h2>Differentiation</h2>
+<table><tr>
+<td class="diff-t"><strong>Support/Scaffold</strong><br>${esc(diff.scaffold)}</td>
+<td class="diff-t"><strong>Core Task</strong><br>${esc(diff.core)}</td>
+<td class="diff-t"><strong>Stretch</strong><br>${esc(diff.stretch)}</td>
+</tr></table>
+<h2>Reflection</h2><ul>${reflection.map(q=>`<li>${esc(q)}</li>`).join('')}</ul>
+<p><strong>Next Steps:</strong></p>
+</body></html>`;
+
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Lesson Plan - ${(data.topic||'Plan').replace(/[\\/:*?"<>|]/g,'')}.doc`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  document.getElementById('statusText').textContent = 'Downloaded .doc file.';
+}
+
+// ═══════════════════════════════════════════════════════
+//  24. PROGRESS ANIMATION
+// ═══════════════════════════════════════════════════════
+
+const STEPS = ['classify','objectives','standards','intro','activities','diff','assess','reflection','render'];
+
+function showStep(id, fill) {
+  STEPS.forEach(s => {
+    const el = document.getElementById(`step-${s}`);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (s === id) el.classList.add('active');
+    else if (STEPS.indexOf(s) < STEPS.indexOf(id)) el.classList.add('done');
+  });
+  document.getElementById('genFill').style.width = fill + '%';
+}
+
+// ═══════════════════════════════════════════════════════
+//  25. GENERATE TRIGGER
+// ═══════════════════════════════════════════════════════
+
+function generatePlan() {
+  const btn = document.getElementById('generateBtn');
+  const statusText = document.getElementById('statusText');
+  const errorBox = document.getElementById('errorBox');
+  const progress = document.getElementById('genProgress');
+  errorBox.style.display = 'none';
+
+  const data = gatherFormData();
+  if (!data.topic) {
+    errorBox.textContent = 'Please enter a Unit / Topic — this is the one thing the engine cannot guess.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  statusText.textContent = '';
+  progress.style.display = 'block';
+  showStep('classify', 5);
+
+  // Async step simulation for UX feedback
+  const stepDelay = 60;
+  const stepSequence = [
+    ['classify', 10],
+    ['objectives', 22],
+    ['standards', 34],
+    ['intro', 46],
+    ['activities', 62],
+    ['diff', 74],
+    ['assess', 84],
+    ['reflection', 92],
+  ];
+
+  let timer = 0;
+  stepSequence.forEach(([stepId, fill]) => {
+    timer += stepDelay;
+    setTimeout(() => showStep(stepId, fill), timer);
+  });
+
+  setTimeout(() => {
+    try {
+      const plan = generatePlanContent(data);
+      showStep('render', 98);
+
+      setTimeout(() => {
+        renderPlan(plan, data);
+        _lastPlan = plan;
+        _lastData = data;
+        document.getElementById('outputToolbar').style.display = 'flex';
+        document.getElementById('emptyState').remove();
+        showStep('render', 100);
+        statusText.textContent = 'Plan generated.';
+        progress.style.display = 'none';
+        btn.disabled = false;
+      }, 120);
+    } catch (err) {
+      errorBox.textContent = 'Generation error: ' + err.message;
+      errorBox.style.display = 'block';
+      progress.style.display = 'none';
+      btn.disabled = false;
+      console.error(err);
+    }
+  }, timer + stepDelay);
+}
+
+// ═══════════════════════════════════════════════════════
+//  26. UI INTERACTIONS
+// ═══════════════════════════════════════════════════════
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// Pill selection (single-select)
+document.querySelectorAll('.mode-pills').forEach(group => {
+  group.querySelectorAll('.mode-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      group.querySelectorAll('.mode-pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+    });
+  });
+});
+
+// Generate button
+document.getElementById('generateBtn').addEventListener('click', generatePlan);
+
+// Default date to today
+document.getElementById('dateField').valueAsDate = new Date();
+</script>
+</body>
+</html>
